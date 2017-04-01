@@ -6,11 +6,10 @@ module.exports = {
     entry: './src/index.js',
     output: {
         path: path.join(__dirname,'./public'),
-       // publicPath: '/',
+        publicPath: '/',
         sourcePrefix: "",
-        filename: "bundle.js"
-        //filename: '[name].min.js',
-        //sourcePrefix: ""
+        //filename: "bundle.js"
+        filename: '[name].min.js'
     },
     devtool: 'eval-source-map',
     resolve: {
@@ -34,6 +33,7 @@ module.exports = {
         //new webpack.optimize.CommonsChunkPlugin({ name: 'library' })
     ],
     module : {
+        unknownContextRegExp: /^.\/.*$/,
         loaders: [
             {
                 test: /\.js$/,
@@ -50,12 +50,38 @@ module.exports = {
                   loader: 'vue-loader',
 
             },
-            { test: /\.css$/, loader: "style!css" },
+            { 
+                test: /\.css$/, 
+                loader: "style-loader!css-loader" },
+
             {
                 test: /\.(png|gif|jpg|jpeg)$/,
                 loader: "file-loader"
             },
-            { test: /Cesium\.js$/, loader: "script" }
+            { 
+                test: /Cesium\.js$/, loader: "script-loader" 
+            },
+            {
+                test: /\.scss$/,
+                loaders: [ 
+                    'style-loader', 
+                    'css-loader', 
+                    'sass-loader' 
+                ]
+            },
+            {
+                 test: /\.(png|woff|woff2|eot|ttf|svg)$/, 
+                 loader: 'url-loader?limit=100000' 
+            },
+            { 
+                test: /\.ttf$/,    loader: "file-loader" 
+            },
+            { 
+                test: /\.eot$/,    loader: "file-loader" 
+            },
+            { 
+                test: /\.svg$/,    loader: "file-loader" 
+            }
         ]
     }
 }

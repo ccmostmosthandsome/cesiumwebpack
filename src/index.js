@@ -1,7 +1,4 @@
-require('cesium/Source/Widgets/widgets.css');
-var BuildModuleUrl = require('cesium/Source/Core/buildModuleUrl');
-BuildModuleUrl.setBaseUrl('./');
+require('../node_modules/bootstrap-sass/assets/stylesheets/_bootstrap.scss')
+import {heart} from './heart'
 
-var Viewer = require('cesium/Source/Widgets/Viewer/Viewer');
-
-var viewer = new Viewer('cesiumContainer');
+heart.$mount("#vue_mount")
