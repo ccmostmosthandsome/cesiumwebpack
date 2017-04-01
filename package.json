@@ -1,0 +1,52 @@
+{
+  "name": "cesium-webpack-boilerplate",
+  "version": "1.1.0",
+  "description": "Cesiumjs work effort",
+  "main": "index.js",
+  "scripts": {
+    "clean": "mkdirp public & rimraf public/*",
+    "build": "npm run clean && cpr node_modules/cesium/Build/Cesium public && webpack --config webpack.config.js --progress",
+    "devserver": "webpack-dev-server --config webpack.config.js --progress --display-error-details",
+    "dev": "npm run build && npm run devserver",
+    "release": "npm run build -- --optimize-minimize"
+  },
+  "dependencies": {
+    "cesium": "^1.19.0",
+    "d3": "^4.7.1",
+    "d3-tip": "^0.7.1",
+    "es6-promise": "^4.0.5",
+    "fetch-polyfill": "^0.8.2",
+    "imports-loader": "^0.7.1",
+    "inert": "^4.1.0",
+    "lodash": "^4.17.4",
+    "material-design-lite": "^1.3.0",
+    "vue": "^2.2.1",
+    "vue-router": "^2.3.0",
+    "vue-server-renderer": "^2.2.1",
+    "vuex": "^2.2.1",
+    "whatwg-fetch": "^2.0.3"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.4.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.0",
+    "babel-preset-es2015": "^6.22.0",
+    "concurrently": "^3.4.0",
+    "cpr": "^1.1.2",
+    "css-loader": "^0.23.1",
+    "exports-loader": "^0.6.4",
+    "file-loader": "^0.9.0",
+    "html-webpack-plugin": "^2.22.0",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.5.2",
+    "script-loader": "^0.7.0",
+    "style-loader": "^0.13.0",
+    "vue-html-loader": "^1.2.4",
+    "vue-loader": "^11.1.4",
+    "vue-template-compiler": "^2.2.1",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
