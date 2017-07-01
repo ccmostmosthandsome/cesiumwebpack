@@ -20,14 +20,19 @@ const nrlForm = resolve => {
   })
 }
 
-
+const nrlQuestions = resolve =>{
+  require.ensure(['../components/nrlSheet.vue'],() =>{
+    resolve(require('../components/nrlSheet.vue'));
+  });
+}
 
 import VueRouter from 'vue-router'
 
 const routes = [
     {path: '/home', component: nrlHome},
     {path: '/map', component: nrlMap},
-    {path: '/form', component: nrlForm}
+    {path: '/form', component: nrlForm},
+    {path: '/questions', component: nrlQuestions}
 ]
 
 const router = new VueRouter({

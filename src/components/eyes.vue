@@ -61,6 +61,11 @@
                 <router-link to="/form">
                     <span class="glyphicon glyphicon-list-alt"></span> Analysis Form <span class="badge pull-right">Cesium</span>
                 </router-link>  
+            </li> 
+            <li>
+                <router-link to="/questions">
+                    <span class="glyphicon glyphicon-list-alt"></span> Questions <span class="badge pull-right">Cesium</span>
+                </router-link>  
             </li>               
         </face>    
     </div>
