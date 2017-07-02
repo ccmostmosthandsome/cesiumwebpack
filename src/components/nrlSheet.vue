@@ -1,21 +1,30 @@
 <template>
   <div class="panel-body">
-    <client-question number="One">
-       <span slot="symbols">
+    <div v-for="(question, index) in questionsMath">
+
+        <client-question :number="index + 1">
+          
+          <span slot="symbols">
+            <!--
+              <p> Given `f(x) = 2x^2 - 3x + 7`, find `f(2.5) .` </p>
+            -->
+            
+              <p v-html="question.question"></p>
+          </span>
+          <span slot="form">
+            
+            <vue-form-generator :schema="schema[question.id]" :model="model[question.id]" ></vue-form-generator>
+            
+          </span>       
+          
+        </client-question>
+        <br/>
+      </div>
+     
+    </div>
 
 
-
-          <p> Given `f(x) = 2x^2 - 3x + 7`, find `f(2.5) .` </p>
-       </span>
-       <span slot="form">
-        <vue-form-generator :schema="schema" :model="model" :options="formOptions"></vue-form-generator>
-       </span>
-       
-       
-    </client-question>
     
-    
-    <br/>
     
 
   </div>
@@ -27,46 +36,55 @@ import VueFormGenerator from "./vue-form-generator";
 import clientQuestion from "./questions/clientQuestion.vue"
 export default {
   components: {clientQuestion},
-  methods: {
-      newField(){
-          this.field = this.field + '_' + Math.floor(Math.random * 10);
-          this.model[this.field] = "test"
-          this.schema.fields.push({
-            type: "input",
-            inputType: "text",
-            label:  this.model[this.field],
-            model: this.model[this.field],
-            placeholder: "New Field",
-            featured: true,
-            required: true           
-          })
-      }
-  },
   mounted(){
-                this.$nextTick(function() {
-                     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-                 });
+
+    
+    this.$nextTick(function() {
+          MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+      });
+
+
+    let request = new Request('/services/questions/get',{
+        method : 'GET',
+        mode: 'cors',
+    });
+
+    fetch(request)
+      .then((response)=>{
+        return response.json()
+      })
+      .then((response)=>{
+        console.log("dingo",response);
+        response.forEach((question)=>{
+          console.log("verifying question return data...",question);
+          this.questionsMath.push(question);
+          this.model[question.id] = { id: question.id};
+          this.model[question.id][question.question] = null; 
+          let questionSchema = {
+            model: question.id,
+            label: question.quesion,
+            type: "questions",
+            values: question.selections
+          }
+          this.schema[question.id] = {
+            fields : []
+          }
+          this.schema[question.id].fields.push(questionSchema);
+          this.$nextTick(function() {
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+          });
+        });
+
+       console.log('dingo this.questionsMath',this.questionsMath);
+
+      })
   },
   data: function(){
     return {
+        questionsMath : [],
         field: null,
-        model: {             
-            id: 1,
-            name: "John Doe",
-            password: "J0hnD03!x4",
-            skills: ["Javascript", "VueJS"],
-            email: "john.doe@gmail.com",
-            status: true
-        },
-    
-        schema: {
-        fields: [{
-            type: "questions",
-            model: "skills",      
-            values: ["5", "12", "19", "24"]
-        }]
-        },
-
+        model: {},  
+        schema:{},
         formOptions: {
         validateAfterLoad: true,
         validateAfterChanged: true

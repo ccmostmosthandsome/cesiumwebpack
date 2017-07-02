@@ -66,7 +66,12 @@
                 <router-link to="/questions">
                     <span class="glyphicon glyphicon-list-alt"></span> Questions <span class="badge pull-right">Cesium</span>
                 </router-link>  
-            </li>               
+            </li>
+           <li>
+                <router-link to="/admin">
+                    <span class="glyphicon glyphicon-list-alt"></span> Admin Too. <span class="badge pull-right"></span>
+                </router-link>  
+            </li>           
         </face>    
     </div>
 

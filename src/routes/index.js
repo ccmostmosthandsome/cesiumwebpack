@@ -26,13 +26,21 @@ const nrlQuestions = resolve =>{
   });
 }
 
+
+const casAdmin = resolve =>{
+  require.ensure(['../components/adminTool/casAdmin.vue'],() =>{
+    resolve(require('../components/adminTool/casAdmin.vue'));
+  });
+}
+
 import VueRouter from 'vue-router'
 
 const routes = [
     {path: '/home', component: nrlHome},
     {path: '/map', component: nrlMap},
     {path: '/form', component: nrlForm},
-    {path: '/questions', component: nrlQuestions}
+    {path: '/questions', component: nrlQuestions},
+    {path: '/admin', component: casAdmin}
 ]
 
 const router = new VueRouter({
