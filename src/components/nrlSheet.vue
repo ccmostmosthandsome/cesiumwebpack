@@ -33,7 +33,8 @@
 <script>
 
 import VueFormGenerator from "./vue-form-generator";
-import clientQuestion from "./questions/clientQuestion.vue"
+import clientQuestion from "./questions/clientQuestion.vue";
+import mixAuth from '../auth/mixAuth'
 export default {
   components: {clientQuestion},
   mounted(){
@@ -47,6 +48,7 @@ export default {
     let request = new Request('/services/questions/get',{
         method : 'GET',
         mode: 'cors',
+        headers: this.getAuthHeader()
     });
 
     fetch(request)
@@ -86,11 +88,11 @@ export default {
         model: {},  
         schema:{},
         formOptions: {
-        validateAfterLoad: true,
-        validateAfterChanged: true
+          validateAfterLoad: true,
+          validateAfterChanged: true
         }
     }
-
-  }
+  },
+  mixins:[mixAuth]
 }
 </script>

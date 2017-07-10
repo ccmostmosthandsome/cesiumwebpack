@@ -123,8 +123,31 @@
         },
         data: function(){
             return {
-                nav: true
+                nav: true,
+                authenticated : false
             }
+        },
+        mounted(){
+          let request = new Request('/services/questions/get',{
+            method : 'GET',
+            mode: 'cors',
+          });
+          console.log("trying to get request");
+          fetch(request)
+            .then((response)=>{
+              console.log("got response back");
+              if(response.headers.get("content-type").indexOf("application/json") !== -1){
+                this.authenticated = true; 
+                return response.json()
+              } else {
+                console.log("Redirecting to login page...");
+                return  this.$router.push({path: '/map"'}); 
+              }
+            })
+            .then((response)=>{
+              console.log("questions");
+            })
+
         }
     }
 </script>
@@ -151,7 +174,7 @@
             </div>
         </div>
         </div>
-            <div class="col-sm-9 col-md-10 affix-content">
+            <div class="col-sm-9 col-md-10 affix-content" style="overflow-y: scroll">
                 <div class="container">
 
                         <div class="page-header viewPort" >

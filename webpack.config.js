@@ -19,17 +19,20 @@ module.exports = {
     },
     devServer: {
         contentBase: "./public",
-    proxy: {
-      '*': {
-        target: 'http://localhost:3335',
-        changeOrigin: true,
-        secure: false,
-        cookieDomainRewrite: '',
-        onProxyReq: function (request, req, res) {
-          request.setHeader('origin', 'http://localhost:3335')
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        },
+        proxy: {
+            '/services': {
+                target: 'http://localhost:3335',
+                changeOrigin: true,
+                secure: false,
+                cookieDomainRewrite: '',
+                onProxyReq: function (request, req, res) {
+                    request.setHeader('origin', 'http://localhost:3335')
+                }
+            }
         }
-      },
-    }
     },
     plugins: [
         new HtmlWebpackPlugin({

@@ -3,10 +3,18 @@
 <script>
     import VueRouter from 'vue-router'
     import face from './face.vue'
+    import navBar from './layout/navBar.vue'
     export default {
         name: 'eyes',
-        components: {face},
+        components: {face,navBar},
+        computed: {
+            isLoggedIn(){
+                return this.$store.getters.isLoggedIn;
+            }
+        },
         data: function(){
+
+            //
             return {
                 mockColumns : {
                     "id" : {
@@ -46,6 +54,7 @@
 </script>
 <template>
     <div>
+        <nav-bar></nav-bar>
         <face>
             <li>
                 <router-link to="/home">
@@ -54,24 +63,25 @@
             </li>
             <li>
                 <router-link to="/map">
-                    <span class="glyphicon glyphicon-road"></span> Map Cesium <span class="badge pull-right">Cesium</span>
+                    <span class="glyphicon glyphicon-road"></span> Map Cesium 
                 </router-link>  
             </li> 
             <li>
                 <router-link to="/form">
-                    <span class="glyphicon glyphicon-list-alt"></span> Analysis Form <span class="badge pull-right">Cesium</span>
+                    <span class="glyphicon glyphicon-list-alt"></span> Analysis Form 
                 </router-link>  
             </li> 
             <li>
                 <router-link to="/questions">
-                    <span class="glyphicon glyphicon-list-alt"></span> Questions <span class="badge pull-right">Cesium</span>
+                    <span class="glyphicon glyphicon-list-alt"></span> Questions 
                 </router-link>  
             </li>
            <li>
                 <router-link to="/admin">
-                    <span class="glyphicon glyphicon-list-alt"></span> Admin Too. <span class="badge pull-right"></span>
+                    <span class="glyphicon glyphicon-list-alt"></span> Admin Tool 
                 </router-link>  
-            </li>           
+            </li> 
+               
         </face>    
     </div>
 

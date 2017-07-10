@@ -33,6 +33,18 @@ const casAdmin = resolve =>{
   });
 }
 
+const casLogin = resolve =>{
+  require.ensure(['../components/loginpage/casLogin.vue'],() =>{
+    resolve(require('../components/loginpage/casLogin.vue'));
+  });
+}
+
+const casRegister = resolve =>{
+  require.ensure(['../components/loginpage/casRegister.vue'],() =>{
+    resolve(require('../components/loginpage/casRegister.vue'));
+  });
+}
+
 import VueRouter from 'vue-router'
 
 const routes = [
@@ -40,7 +52,9 @@ const routes = [
     {path: '/map', component: nrlMap},
     {path: '/form', component: nrlForm},
     {path: '/questions', component: nrlQuestions},
-    {path: '/admin', component: casAdmin}
+    {path: '/admin', component: casAdmin},
+    {path: '/login', component: casLogin},
+    {path: '/register', component: casRegister}
 ]
 
 const router = new VueRouter({
