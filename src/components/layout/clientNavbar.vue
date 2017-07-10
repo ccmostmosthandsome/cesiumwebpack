@@ -44,7 +44,7 @@
     import mixAuth from '../../auth/mixAuth';
     import jwtDecode from 'jwt-decode';
     export default {
-        name: 'navBar',
+        name: 'clientNavbar',
         methods: {
             logout(){
                 console.log("logging out...");
