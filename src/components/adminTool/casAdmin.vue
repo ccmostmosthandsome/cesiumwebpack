@@ -151,52 +151,9 @@ export default {
                 if (field !== "id") {
                     this.questionFormModel.selections.push(this.selectionFormModel[field]);
                 }
->>>>>>> Stashed changes
 
             }
         },
-<<<<<<< Updated upstream
-        methods: {
-            createQuestion(){
-                this.questionFormModel.selections = [];
-                for(var field in this.selectionFormModel){
-                    if(field !== "id"){
-                        this.questionFormModel.selections.push(this.selectionFormModel[field]);
-                    }
-                   
-                }
-                //Remove id field to leave only selections in array.
-                this.questionFormModel.id = Math.floor(Math.random() * 30000); 
-
-                let request = new Request('/services/questions/add',{
-                    method : 'POST',
-                    mode: 'cors',
-                    redirect: 'follow',
-                    body: JSON.stringify(this.questionFormModel),
-                    headers: new Headers({
-                        'Content-Type' : 'application/json'
-                    })
-                });
-
-                console.log("request?",request);
-                fetch(request)
-                    .then((response)=>{
-                        console.log("dingo");
-                    });
-
-            },
-            showMathJax(){
-                this.$nextTick(function() {
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-                });
-
-            }
-        },
-        mounted(){
-            this.$nextTick(function () {
-            MathJax.Hub.Typeset()    
-            })  
-=======
         openModal(event) {
             console.log("dingo")
             console.log("dingo")
@@ -272,7 +229,6 @@ export default {
                     commit('ADMIN_REGISTERED', response);
                     resolve();
                 })
->>>>>>> Stashed changes
         }
     },
     mixins: [mixQuestions, mixAuth],
@@ -288,36 +244,7 @@ export default {
 </style>
 <template>
     <div>
-    
-<<<<<<< Updated upstream
-        
-            <b-tabs small card ref="tabs" v-model="tabIndex">
-                <b-tab title="Add Questions" active>
-                
-                   <vue-form-generator :schema="questionFormSchema" :model="questionFormModel" ></vue-form-generator>
-                   </br>
-                   <label>Add Selections</label>
-                   <vue-form-generator :schema="selectionFormSchema" :model="selectionFormModel" ></vue-form-generator>
-                   <button class="btn btn-default" @click="showMathJax()">Update Mathjax</button>
-                   <br/>
-                   <br/>
-                   <label>Check Latex</label>
-                   <textarea v-model="latex"/>
-                   <p>Result... {{latex}}</p>
-                   <hr/>
-                   <button class="btn btn-primary" @click="createQuestion">submit</button>
-                </b-tab>
-                <b-tab title="Manage Roles">
-                    Role Management
-                    <b-card>Using cards might work for each role</b-card>
-                </b-tab>
-                <b-tab title="Modify Schema" >
-                    Schema!
-                </b-tab>
-            </b-tabs>
 
-        
-=======
         <b-tabs small card ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
     
@@ -357,7 +284,7 @@ export default {
         </b-tabs>
         <client-modal modalid="Manage Questions" :open="modalstatus" :modalSchema="manageQuestionSchema" :modalModel="manageQuestionModel" ref="dialog" @modalSubmitted="handleModal">
         </client-modal>
->>>>>>> Stashed changes
+
     </div>
 
 </template>
