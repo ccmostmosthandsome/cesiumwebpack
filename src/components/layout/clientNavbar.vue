@@ -20,22 +20,7 @@
                 </li>
             </ul>
             <ul class="navbar-nav navbar-right">
-                <li> 
-                    <div v-if="isLoggedIn">
-                        <!-- <button @click="testAccount">TestAccount</button> -->
-                        {{account.sub}}
-                        <button class="btn btn-default" @click="logout"><i class="glyphicon glyphicon-user" aria-hidden="true"></i> &nbsp; Log out {{account.sub}}</button>  
-                    </div> 
-                    <div v-if="!isLoggedIn">
-                            <router-link to="/login">
-                              <i class="glyphicon glyphicon-user"></i> Log In
-                            </router-link>  
-                            
-
-                        
-                    </div>
-                    
-                </li>
+               <slot name="right"></slot>
             </ul>
         </div>
     </nav>

@@ -7,18 +7,18 @@ import jwtDecode from 'jwt-decode';
 
 
 import VueRouter from 'vue-router'
-import casTraditionalayout from '../layout/casTraditionalayout.vue'
+import casTraditionallayout from '../layout/casTraditionallayout.vue'
 import clientNavbar from '../layout/clientNavbar.vue'
-import {mixAuth} from '../../auth/mixAuth'
+import mixAuth from '../../auth/mixAuth';
 import clientToggle from '../buttons/clientToggle.vue'
 import menuSchema from '../tree/courseQuestionDropdown'
 import casTree from '../tree/casTree.vue'
 import modelData from '../tree/casTreeMock'
-console.log("compoennts =>",casTraditionalayout, clientNavbar, clientToggle, casTree );
-console.log("mixins =>",mixAuth);
+console.log("compoennts =>", casTraditionallayout, clientNavbar, clientToggle, casTree);
+console.log("mixins =>", mixAuth);
 export default {
     name: 'casRoot',
-    components: { casTraditionalayout, clientNavbar, clientToggle, casTree },
+    components: { casTraditionallayout, clientNavbar, clientToggle, casTree },
     computed: {
         isLoggedIn() {
             return this.$store.getters.isLoggedIn;
@@ -34,7 +34,7 @@ export default {
     data: function () {
 
         return {
-            whatTheFuck:  jwtDecode(localStorage.getItem('token')),
+            whatTheFuck: jwtDecode(localStorage.getItem('token')),
             schema: menuSchema,
             modelData: modelData
         }
@@ -44,7 +44,7 @@ export default {
             console.log("in auth");
             if (this.$store.getters.isLoggedIn) {
                 console.log("logging out...");
-                // this.userAccount = {};
+                // this.userAccount = ??{};
                 this.$store.dispatch('logout');
                 // this.labels = {"unchecked" : 'Login', "checked" : 'Logout'}          
             } else {
@@ -66,7 +66,7 @@ export default {
                     }
                 }
                 return acc;
-            },{})
+            }, {})
             return Object.keys(questionObject).map((question) => { return questionObject[question] });
 
         },
@@ -95,15 +95,16 @@ export default {
 
 
         },
-        mixins: [mixAuth],
-        mounted() {
 
-            this.$store.dispatch("getQuestions", 'GED')
-                .then((response) => {
-                    this.loading = false;
-                })
+    },
+    mixins: [mixAuth],
+    mounted() {
 
-        }
+        this.$store.dispatch("getQuestions", 'GED')
+            .then((response) => {
+                this.loading = false;
+            })
+
     }
 }
 </script>
@@ -116,7 +117,7 @@ export default {
                     <div v-if="isLoggedIn">
     
                         <span style="color:#337A87 ; cursor: pointer" @click="auth">
-                            <i class="glyphicon glyphicon-user" aria-hidden="true"></i> &nbsp; Log out 
+                            <i class="glyphicon glyphicon-user" aria-hidden="true"></i> &nbsp; Log out
                         </span>
     
                     </div>
@@ -132,7 +133,7 @@ export default {
                 </li>
             </div>
         </client-navbar>
-        <cas-traditionalayout>
+        <cas-traditionallayout>
             <div slot="sidebar">
     
                 <ul class="nav navbar-nav" id="sidenav01">
@@ -152,8 +153,7 @@ export default {
                             <router-view name="treeMenu"></router-view>
                         </router-link>
                     </li>
-                    
-
+    
                     <li v-if="isAdmin">
     
                         <router-link to="/admin">
@@ -161,9 +161,7 @@ export default {
                         </router-link>
     
                     </li>
-
-                     
-
+    
                 </ul>
     
             </div>
@@ -174,7 +172,7 @@ export default {
             </div>
             <div slot="aside">
                 <p>
-                    WTF?? {{mixAuth}}
+                    WTF?? {{labels}}
                 </p>
                 <h3>
                     <span class="glyphicon glyphicon-th-list"></span>
@@ -184,6 +182,6 @@ export default {
                 </router-view>
     
             </div>
-        </cas-traditionalayout>
+        </cas-traditionallayout>
     </div>
 </template>

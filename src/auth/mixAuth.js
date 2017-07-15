@@ -1,7 +1,8 @@
 import jwtDecode from 'jwt-decode';
 
 
-export const mixAuth = {
+export default  {
+
     data: function(){
         return {
             tokenAuth: {},
