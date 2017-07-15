@@ -66,8 +66,10 @@ export default {
                     }
                 }
                 return acc;
-            }, {})
-            return Object.keys(questionObject).map((question) => { return questionObject[question] });
+            }.bind(this), {})
+            return Object.keys(questionObject)
+                        .map((question) => { return questionObject[question] })
+                        .filter(question => question.id);
 
         },
         getModules() {

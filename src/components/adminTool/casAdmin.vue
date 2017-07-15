@@ -2,7 +2,7 @@
 
 import VueFormGenerator from "../vue-form-generator";
 import mixQuestions from "./mixQuestions"
-import {mixAuth} from "../../auth/mixAuth"
+import mixAuth from "../../auth/mixAuth"
 import clientGrid from "../grids/clientGrid.vue";
 import clientModal from "../layout/clientModal.vue"
 export default {
@@ -143,7 +143,7 @@ export default {
 
         }
     },
-    components: { clientGrid, clientModal },
+    components: {  clientModal },
     methods: {
         createQuestion() {
             this.questionFormModel.selections = [];
