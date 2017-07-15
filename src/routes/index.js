@@ -4,14 +4,14 @@ const nrlHome = resolve => {
     resolve(require('../components/nrlHome.vue'))
   })
 }
-
+/*
 const nrlMap = resolve => {
   // require.ensure is Webpack's special syntax for a code-split point.
   require.ensure(['../components/nrlMap.vue'], () => {
     resolve(require('../components/nrlMap.vue'))
   })
 }
-
+*/
 
 const nrlForm = resolve => {
   // require.ensure is Webpack's special syntax for a code-split point.
@@ -45,13 +45,39 @@ const casRegister = resolve =>{
   });
 }
 
+
+const casTree = resolve =>{
+  require.ensure(['../components/tree/casTree.vue'],()=>{
+    resolve(require('../components/tree/casTree.vue'));
+  });
+}
+
+const casLearning = resolve => {
+  require.ensure(['../components/learning/casLearning.vue'],()=>{
+    resolve(require('../components/learning/casLearning.vue'));
+  })
+}
+
 import VueRouter from 'vue-router'
 
 const routes = [
-    {path: '/home', component: nrlHome},
-    {path: '/map', component: nrlMap},
+    {path: '/home', component: casHome},
+    {path: '/map', component: casHome},
     {path: '/form', component: nrlForm},
-    {path: '/questions', component: nrlQuestions},
+    {path: '/questions',
+        name: 'questions',
+        components: {
+        default: casSheet,
+        treeMenu: casTree,
+        aside: casLearning
+      },
+        props: {
+          default : true,
+          treeMenu: true,
+          aside: true
+          
+        }
+    },
     {path: '/admin', component: casAdmin},
     {path: '/login', component: casLogin},
     {path: '/register', component: casRegister}

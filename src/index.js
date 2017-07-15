@@ -1,4 +1,4 @@
 require('../node_modules/bootstrap-sass/assets/stylesheets/_bootstrap.scss')
-import {heart} from './heart'
+import {app} from './app'
 
-heart.$mount("#vue_mount")
+app.$mount("#vue_mount")
