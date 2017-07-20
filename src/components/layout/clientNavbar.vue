@@ -20,7 +20,10 @@
                 </li>
             </ul>
             <ul class="navbar-nav navbar-right">
-               <slot name="right"></slot>
+                <li>
+                    <slot name="right"></slot>
+                </li>
+                
             </ul>
         </div>
     </nav>

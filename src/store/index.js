@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import jwtDecode from 'jwt-decode';
-import {getAuthHeader} from '../auth/modAuth';
+import { getAuthHeader } from '../auth/modAuth';
 Vue.use(Vuex)
 
 const state = {
@@ -12,11 +12,33 @@ const state = {
     account: {},
     accountRoles: [],
     course: {},
-    questions: {}
+    questions: {},
+    hints: {},
+    dropdownPayload: {}
 }
 
 const mutations = {
-    ADD_GRADES(state, returnObject){
+    UPDATE_HINT(state, payload) {
+
+        if(!state.hints[payload.coursetype]){
+            Vue.set(state.hints,payload.coursetype,[]);
+        }
+        let hintExists = state.hints[payload.coursetype].some((hint)=>{
+            if(!hint.questionId){
+                return false
+            } 
+            return hint.questionId === payload.questionId;
+        })
+
+        !hintExists ? state.hints[payload.coursetype].push(payload) : state.hints[payload.coursetype] = state.hints[payload.coursetype]; 
+    },
+    REMOVE_HINT(state, payload) {
+        state.hints[payload.coursetype] = state.hints[payload.coursetype].filter(hint => hint.questionId !== payload.questionId);
+    },
+    ADD_DROPDOWN_PAYLOAD(state, payload) {
+        Object.assign(state.dropdownPayload, payload);
+    },
+    ADD_QUESTIONS(state, returnObject) {
         Vue.set(state.questions, returnObject.type, returnObject.records);
     },
     changeColumns(state, col) {
@@ -53,6 +75,7 @@ const mutations = {
 const actions = {
     //changeColumns: ({commit}, state) => commit('changeColumns',state),
     //changeRows: ({commit}, state) => commit('changeRows',state),
+    sendDropdownPayload: ({ commit }, state) => commit('ADD_DROPDOWN_PAYLOAD', state),
     changeToken: ({ commit }, state) => commit('changeToken', state),
     changeRows: ({ commit }, state) => commit('changeRows', state),
     changeColumns: ({ commit }, state) => {
@@ -77,6 +100,34 @@ const actions = {
     },
     changeAccount: ({ commit }, state) => commit('CHANGE_ACCOUNT', state),
     changeCourse: ({ commit }, state) => commit('CHANGE_COURSE', state),
+    updateHint: ({commit}, state) => commit('UPDATE_HINT',state),
+    removeHint: ({commit}, state) => commit('REMOVE_HINT',state),
+    getByCourse: ({ commit }, course) => {
+        return new Promise(resolve => {
+            let request = new Request('/services/questions/get/coursetype?coursetype=' + course, {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()
+            });
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json()
+                    }
+                    throw (response)
+                })
+                .then((response) => {
+                    var returnObject = {
+                        type: course,
+                        records: response
+                    }
+                    
+                    commit('ADD_QUESTIONS', returnObject);
+                    resolve();
+                })
+        });
+
+    },
     getQuestions: ({ commit }, type) => {
         return new Promise(resolve => {
             let request = new Request('/services/questions/get', {
@@ -85,25 +136,25 @@ const actions = {
                 headers: getAuthHeader()
             });
 
-             fetch(request)
-                .then((response)=>{
-                    if(response.ok){
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
                         return response.json();
                     }
 
-                    throw(response);
+                    throw (response);
 
                 })
-                .then((response)=>{
+                .then((response) => {
                     var returnObject = {
-                        type : type,
-                        records : response
+                        type: type,
+                        records: response
                     }
                     response.type = type;
-                    commit('ADD_GRADES',returnObject);
+                    commit('ADD_QUESTIONS', returnObject);
                     resolve();
                 })
-                .catch((response)=>{
+                .catch((response) => {
 
                 })
 
@@ -169,7 +220,9 @@ const actions = {
 }
 
 const getters = {
-
+    dropdownPayload: state => {
+        return state.dropdownPayload;
+    },
     isLoggedIn: state => {
         return state.isLoggedIn;
     },
@@ -184,6 +237,13 @@ const getters = {
     },
     getRowState: (state, getters) => (storeid) => {
         return state.tableRows[storeid];
+    },
+    getCourseHints: (state,getters) => (coursetype) =>{
+        console.log("dingo")
+                console.log("dingo")
+                        console.log("dingo")
+                                console.log("dingo")
+        return state.hints[coursetype];
     }
 }
 

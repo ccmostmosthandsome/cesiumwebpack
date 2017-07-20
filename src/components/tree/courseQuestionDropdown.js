@@ -1,17 +1,17 @@
 export default {
     menuSchema: {
         course: {
-            id: 'course77',
+            id: 'course',
             list: [
-            {text : 'Report', id: 1},
-            {text: 'Start All', id: 2},
+            {text : 'Start Koans', id: 1},
+            {text: 'Report', id: 2},
             {text: 'Start Course Videos', id: 3}
         ]},
         mod: {
-            id: 'module77',
+            id: 'module',
             list: [  
-                {text : 'Report', id: 1},
-                {text: 'Start All', id: 2},
+                {text : 'Start Koans', id: 1},
+                {text: 'Report', id: 2},
                 {text: 'Start Course Videos', id: 3},
                 {text: 'Remove', id: 4}
             

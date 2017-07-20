@@ -21,10 +21,12 @@
     
                                 <!-- <span v-bind:class="iconValue" style="cursor: none;"></span  v-for="option in options.list" v-bind:value="option.id"> -->
                                 <span v-html="model.text"></span> 
+                                <!--
                                 <b-dropdown size="sm"  class="m-md-1">
                                     <b-dropdown-item href="#" v-for="option in menuList.list" v-bind:key="option.id" v-bind:value="option.id">{{option.text}}</b-dropdown-item>
                                 </b-dropdown>
-                                
+                                -->
+                                <client-dropdown :options="menuList" :focusItem="model"> </client-dropdown>
                             
                         </span>
                         <span v-else>
@@ -49,9 +51,10 @@
 <script>
 import clientToggle from '../buttons/clientToggle.vue';
 import clientContextmenu from '../buttons/clientContextmenu.vue';
+import clientDropdown from '../buttons/clientDropdown.vue'
 import { EventBus } from '../../eventbus/index';
 export default {
-    components: { clientToggle, clientContextmenu },
+    components: { clientToggle, clientContextmenu, clientDropdown },
     computed: {
         hasChildren: function () {
             return this.model.children && this.model.children.length ? true : false
@@ -118,7 +121,8 @@ export default {
                 return child;
             });
             EventBus.$emit('moveFolder', data, this.model);
-        }
+        },
+
     },
     mounted() {
         console.log("dingo in tree =>>", this);

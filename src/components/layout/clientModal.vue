@@ -6,6 +6,9 @@
             <div class="panel panel-body">
                 <vue-form-generator :schema="modalSchema" :model="modalModel"></vue-form-generator>
             </div>
+            <div class="panel panel-footer">
+                <slot name="footer"></slot>
+            </div>
         </div>
         
         

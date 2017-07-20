@@ -1,11 +1,14 @@
 <style>
-
+.navBarDisplay {
+    display: inline-block;
+}
 </style>
 <script>
 
-import jwtDecode from 'jwt-decode';
 
-
+import mixDropDown from '../../mixins/mixDropDown'
+import { EventBus } from '../../eventbus/index';
+import { getAuthHeader } from '../../auth/modAuth';
 import VueRouter from 'vue-router'
 import casTraditionallayout from '../layout/casTraditionallayout.vue'
 import clientNavbar from '../layout/clientNavbar.vue'
@@ -13,12 +16,14 @@ import mixAuth from '../../auth/mixAuth';
 import clientToggle from '../buttons/clientToggle.vue'
 import menuSchema from '../tree/courseQuestionDropdown'
 import casTree from '../tree/casTree.vue'
+import casPalmadoro from '../timers/casPalmadoro.vue'
 import modelData from '../tree/casTreeMock'
-console.log("compoennts =>", casTraditionallayout, clientNavbar, clientToggle, casTree);
+import lodash from 'lodash';
+console.log("compoennts =>", casTraditionallayout, clientNavbar, clientToggle, casTree, casPalmadoro);
 console.log("mixins =>", mixAuth);
 export default {
     name: 'casRoot',
-    components: { casTraditionallayout, clientNavbar, clientToggle, casTree },
+    components: { casTraditionallayout, clientNavbar, clientToggle, casTree, casPalmadoro },
     computed: {
         isLoggedIn() {
             return this.$store.getters.isLoggedIn;
@@ -28,15 +33,26 @@ export default {
             get() {
                 return this.$store.getters.questions('GED');
             }
-
+        },
+        questionsByCourse: {
+            get() {
+                return this.$store.getters.questions(this.questionsCategory);
+            },
+            set(category) {
+                this.questionsCategory = category;
+                return this.$store.getters.questions(this.questionsCategory);
+            }
         }
     },
     data: function () {
 
         return {
-            whatTheFuck: jwtDecode(localStorage.getItem('token')),
+            coursetype: null,
             schema: menuSchema,
-            modelData: modelData
+            modelData: modelData,
+            questionsCategory: '',
+            tree: {},
+            questionHint: []
         }
     },
     methods: {
@@ -55,40 +71,55 @@ export default {
             }
         },
         getCourses() {
+
             var questionObject = this.questions.reduce(function (acc, curr) {
+                var context = this;
+                context.parent = curr;
                 if (!acc[curr.coursetype]) {
                     acc[curr.coursetype] = {
                         "id": curr.coursetype,
                         "text": curr.coursetype,
                         "parent": this.parent,
                         "attr": { "type": 'course' },
-                        "children": []
+                        "children": this.getModules.call(context)
                     }
                 }
                 return acc;
             }.bind(this), {})
             return Object.keys(questionObject)
-                        .map((question) => { return questionObject[question] })
-                        .filter(question => question.id);
+                .map((question) => { return questionObject[question] })
+                .filter(question => question.id);
 
         },
         getModules() {
-
+            var moduleObject = this.questions.reduce(function (acc, curr) {
+                if (!acc[curr.modtype] && this.parent.coursetype === curr.coursetype) {
+                    acc[curr.modtype] = {
+                        "id": curr.id,
+                        "text": curr.modtype,
+                        "parent": this.parent.id,
+                        "attr": { "type": 'mod' },
+                        "children": []
+                    }
+                }
+                return acc;
+            }.bind(this), {})
+            return Object.keys(moduleObject)
+                .map((module) => { return moduleObject[module] })
+                .filter(module => module.id);
         },
-        treeEtl() {
+        createTree() {
             console.log("dingo");
             console.log("dingo")
 
             console.log("dingo")
             let context = this;
             context.parent = 'Root';
-            const tree = {
-                id: 'Root',
-                attr: { type: 'course' },
-                parent: 'false',
-                children: this.getCourses()
-            }
 
+            this.$set(this.tree, 'id', 'Root')
+            this.$set(this.tree, 'attr', { type: 'course' })
+            this.$set(this.tree, 'parent', 'false')
+            this.$set(this.tree, 'children', this.getCourses());
             console.log("dingo");
             console.log("dingo")
 
@@ -99,14 +130,58 @@ export default {
         },
 
     },
-    mixins: [mixAuth],
+    mixins: [mixAuth, mixDropDown],
     mounted() {
 
         this.$store.dispatch("getQuestions", 'GED')
             .then((response) => {
                 this.loading = false;
-            })
+                this.createTree();
 
+            })
+        EventBus.$on('dropdownPayload', (payload) => {
+
+            console.log("dingo");
+            console.log("dingo");
+            console.log("dingo");
+            console.log("dingo");
+
+            this.fetchResults(payload)
+                .then(function () {
+                    console.log("dingo");
+                    console.log("dingo");
+                    console.log("dingo");
+                    console.log("dingo", payload);
+
+                    this.questionsByCourse = payload.item;
+
+                    this.coursetype = payload.item;
+                }.bind(this))
+            console.log("got dropdown payload from eventbus =>>", payload)
+
+        });
+
+        EventBus.$on('showHint', (payload) => {
+            console.log("dingo dingo", payload, payload.questionId); //services/questions/find/content/questionid
+            let request = new Request('/services/questions/find/content/questionid?questionid=' + payload.questionId, {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()
+            });
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json()
+                    }
+                })
+                .then((response) => {
+                    console.log("response??", response);
+                    response.coursetype = this.coursetype;
+                    this.$store.dispatch("updateHint", response);
+
+                })
+            ///find/questionid
+        })
     }
 }
 </script>
@@ -114,26 +189,26 @@ export default {
     <div>
         <client-navbar>
     
-            <div slot="right">
-                <li>
-                    <div v-if="isLoggedIn">
+            <span slot="right" style="display: inline-block;">
+                <cas-palmadoro></cas-palmadoro>   
+                <span v-if="isLoggedIn" class="navBarDisplay">
+                    <span>
     
                         <span style="color:#337A87 ; cursor: pointer" @click="auth">
-                            <i class="glyphicon glyphicon-user" aria-hidden="true"></i> &nbsp; Log out
+                            <i class="glyphicon glyphicon-user" aria-hidden="true"></i> &nbsp; Log out {{account.sub}}
                         </span>
+                    </span>
     
-                    </div>
-                    <div v-if="!isLoggedIn">
-                        <router-link to="/login">
-                            <i class="glyphicon glyphicon-user"></i> Log In
-                        </router-link>
+                </span>
+                <div v-if="!isLoggedIn">
+                    <router-link to="/login">
+                        <i class="glyphicon glyphicon-user"></i> Log In
+                    </router-link>
     
-                    </div>
-                </li>
-                <li>
-                    <button class="btn btn-success btn-xs" @click="treeEtl">ETL</button>
-                </li>
-            </div>
+                </div>
+
+            </span>
+    
         </client-navbar>
         <cas-traditionallayout>
             <div slot="sidebar">
@@ -150,12 +225,12 @@ export default {
                         </router-link>
                     </li>
                     <li>
-                        <router-link :to="{name: 'questions', params: {model : modelData.modelData, menuSchema : schema.menuSchema, showRoot: false}}">
+                        <router-link :to="{name: 'questionView', params: {model : tree, menuSchema : schema.menuSchema, showRoot: false}}">
                             <span class="glyphicon glyphicon-list-alt"></span> Questions
+    
                             <router-view name="treeMenu"></router-view>
                         </router-link>
                     </li>
-    
                     <li v-if="isAdmin">
     
                         <router-link to="/admin">
@@ -168,18 +243,12 @@ export default {
     
             </div>
             <div slot="content">
-                <h3>
-                    <span class="glyphicon glyphicon-th-list"></span> NRL Prototyping</h3>
-                <router-view></router-view>
+    
+                <router-view :questions="questionsByCourse"></router-view>
             </div>
             <div slot="aside">
-                <p>
-                    WTF?? {{labels}}
-                </p>
-                <h3>
-                    <span class="glyphicon glyphicon-th-list"></span>
-                </h3>
-                <router-view name="aside">
+    
+                <router-view name="aside" :course="coursetype">
     
                 </router-view>
     

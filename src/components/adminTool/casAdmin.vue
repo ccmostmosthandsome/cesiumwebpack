@@ -43,13 +43,13 @@ export default {
                         type: "select",
                         label: "coursetype",
                         model: "coursetype",
-                        values: ["Math", "Science", "Language"]
+                        values: ["Math", "Science", "Language", "Civics"]
                     },
                     {
                         type: "select",
                         label: "modtype",
                         model: "modtype",
-                        values: ["Intro", "Algebra", "Statistics", "Geometry"]
+                        values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
                     }
                 ]
             },
@@ -62,20 +62,48 @@ export default {
                 fields: [
                     {
                         type: "input",
-                        label: "Admin Name",
-                        model: "username"
+                        label: "Add Content",
+                        model: "ContentHints"
                     },
                     {
                         type: "input",
-                        label: "Admin Password",
-                        model: "password"
+                        label: "Admin Videos",
+                        model: "VideoHints"
+                    }
+                ]
+            },
+            questionMaterialModel: {
+                id: null,
+                questionhint: "question hint",
+                videoHint: "video hint",
+                questionId: "6"
+            },
+            questionMaterialSchema: {
+                fields: [
+                    {
+                        type: "text-area",
+                        label: "Add Material",
+                        model: "questionhint"
+
+                    },
+                    {
+                        type: "input",
+                        label: "Add Video",
+                        model: "videoHint"
+
+                    },
+                    {
+                        type: "input",
+                        label: "Question Key",
+                        model: "questionId"
                     }
                 ]
             },
             questionFormModel: {
                 id: 1,
                 question: null,
-                type: null,
+                coursetype: null,
+                modtype: null,
                 answer: null,
                 explanation: null
 
@@ -89,9 +117,15 @@ export default {
                     },
                     {
                         type: "select",
-                        label: "Type",
-                        values: ["math", "science", "english", "civics"],
-                        model: "type",
+                        label: "coursetype",
+                        model: "coursetype",
+                        values: ["Math", "Science", "Language", "Civics"]
+                    },
+                    {
+                        type: "select",
+                        label: "modtype",
+                        model: "modtype",
+                        values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
                     },
                     {
                         type: "input",
@@ -143,8 +177,28 @@ export default {
 
         }
     },
-    components: {  clientModal },
+    components: { clientModal, clientGrid },
     methods: {
+        addQuestionMaterial() {
+            
+            
+
+            this.questionMaterialModel.id = Math.floor(Math.random() * 33007);
+            let request = new Request('/services/questions/add/content', {
+                method: 'POST',
+                mode: 'cors',
+                redirect: 'follow',
+                body: JSON.stringify(this.questionMaterialModel),
+                headers: this.getAuthHeader()
+            });
+            
+            console.log("request?", request);
+            fetch(request)
+                .then((response) => {
+                    console.log("dingo");
+                });
+            //Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy that can later be released to fuel the organisms' activities (energy transformation). This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water – hence the name photosynthesis, from the Greek φῶς, phōs, "light", and σύνθεσις, synthesis, "putting together".In most cases, oxygen is also released as a waste product. Most plants, most algae, and cyanobacteria perform photosynthesis; such organisms are called photoautotrophs. Photosynthesis is largely responsible for producing and maintaining the oxygen content of the Earth's atmosphere, and supplies all of the organic compounds and most of the energy necessary for life on Earth.
+        },
         createQuestion() {
             this.questionFormModel.selections = [];
             for (var field in this.selectionFormModel) {
@@ -153,18 +207,61 @@ export default {
                 }
 
             }
+            //Remove id field to leave only selections in array.
+            this.questionFormModel.id = Math.floor(Math.random() * 30000);
+            this.questionFormModel.questionId = Math.floor(Math.random() * 33007);
+
+            let request = new Request('/services/questions/add', {
+                method: 'POST',
+                mode: 'cors',
+                redirect: 'follow',
+                body: JSON.stringify(this.questionFormModel),
+                headers: this.getAuthHeader()
+            });
+
+            console.log("request?", request);
+            fetch(request)
+                .then((response) => {
+                    console.log("dingo");
+                });
+
+        },
+        deleteQuestion() {
+            const requestLogin = {
+                method: 'DELETE',
+                mode: 'cors',
+                redirect: 'follow',
+                body: JSON.stringify(this.manageQuestionModel),
+                headers: this.getAuthHeader()
+            }
+
+            fetch('/services/questions/delete', requestLogin)
+                .then(function (response) {
+                    console.log("dingo")
+                    console.log("dingo")
+                    console.log("dingo")
+                    console.log("dingo")
+                    if (response.ok) {
+
+                        this.$refs.dialog.close();
+                    }
+                    throw (response);
+                }.bind(this))
+                .catch((response) => {
+                    console.log("dingo");
+                });
         },
         openModal(event) {
             console.log("dingo")
             console.log("dingo")
             console.log("dingo")
-            for(var i in this.manageQuestionModel){
-                
-                this.$set(this.manageQuestionModel,i,event[i])
+            for (var i in this.manageQuestionModel) {
+
+                this.$set(this.manageQuestionModel, i, event[i])
             }
             console.log("dingo")
             console.log("dingo")
-            console.log("dingo")            
+            console.log("dingo")
             this.$refs.dialog.openModal();
 
         },
@@ -177,21 +274,21 @@ export default {
                 body: JSON.stringify(this.manageQuestionModel),
                 headers: this.getAuthHeader()
             }
-            
+
             fetch('/services/questions/update', requestLogin)
-                .then((response)=>{
-                    if(response.OK){
+                .then((response) => {
+                    if (response.OK) {
                         return response.json()
                     }
-                    else{
-                        throw(e)
+                    else {
+                        throw (e)
                     }
                 })
-                .then((response)=>{
-                    console.log("success response for updating question",response);
+                .then((response) => {
+                    console.log("success response for updating question", response);
                 })
-                .catch((response)=>{
-                    console.log("response caught...",response)
+                .catch((response) => {
+                    console.log("response caught...", response)
                 })
 
         },
@@ -241,10 +338,13 @@ export default {
 
 </script>
 <style>
+.content {
+    overflow-y: scroll;
+}
 </style>
 <template>
     <div>
-
+    
         <b-tabs small card ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
     
@@ -261,9 +361,22 @@ export default {
                 <hr/>
                 <button class="btn btn-primary" @click="createQuestion">submit</button>
             </b-tab>
-            <b-tab title="Manage Roles">
-                Role Management
-                <b-card>Using cards might work for each role</b-card>
+            <b-tab title="Add Question Content">
+                <div class="content">
+    
+                    <vue-form-generator :schema="questionMaterialSchema" :model="questionMaterialModel"></vue-form-generator>
+                    </br>
+                    <button class="btn btn-default" @click="showMathJax()">Update Mathjax</button>
+                    <br/>
+                    <br/>
+                    <label>Check Latex</label>
+                    <textarea v-model="latex" />
+                    <p>Result... {{latex}}</p>
+                    <hr/>
+                    <button class="btn btn-primary" @click="addQuestionMaterial">submit</button>
+    
+                </div>
+    
             </b-tab>
             <b-tab title="Modify Schema">
                 Schema!
@@ -271,7 +384,7 @@ export default {
             <b-tab title="Manage Questions">
                 <div class="panel panel-default">
                     <div class="panel panel-body">
-                        <client-grid type="manySelection" gridid="adminQuestions" v-on:rowSelected="openModal"></client-grid>
+                        <client-grid gridid="adminQuestions" v-on:rowSelected="openModal"></client-grid>
                     </div>
                     <div class="panel panel-footer">
                         <button class="btn btn-primary" @click="getQuestions">Get Questions...</button>
@@ -283,8 +396,11 @@ export default {
     
         </b-tabs>
         <client-modal modalid="Manage Questions" :open="modalstatus" :modalSchema="manageQuestionSchema" :modalModel="manageQuestionModel" ref="dialog" @modalSubmitted="handleModal">
+            <div slot="footer">
+                <button class="btn btn-warning" @click="deleteQuestion">Delete</button>
+    
+            </div>
         </client-modal>
-
+    
     </div>
-
 </template>

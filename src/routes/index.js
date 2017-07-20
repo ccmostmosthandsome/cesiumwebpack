@@ -52,13 +52,16 @@ const casLearning = resolve => {
   })
 }
 
+
+
+
 import VueRouter from 'vue-router'
 
 const routes = [
     {path: '/home', component: casHome},
     {path: '/map', component: casHome},
     {path: '/questions',
-        name: 'questions',
+        name: 'questionView',
         components: {
         default: casSheet,
         treeMenu: casTree,

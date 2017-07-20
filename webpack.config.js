@@ -62,6 +62,11 @@ module.exports = {
             {
                 test: /\.vue$/,
                 loader: 'vue-loader',
+                options: {
+                    loaders: {
+                         scss: 'vue-style-loader!css-loader!sass-loader'
+                    }
+                }
 
             },
             {
@@ -82,6 +87,7 @@ module.exports = {
                     'style-loader',
                     'css-loader',
                     'sass-loader'
+                    
                 ]
             },
             {
