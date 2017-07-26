@@ -30,7 +30,11 @@
                 this.$store.dispatch("login",this.loginModel)
                         .then(()=>{
                             console.log("dingo dingo")
-                            this.$router.push("/"); 
+                           return this.$store.dispatch("fetchContractAnswers",this.account.sub)
+ 
+                        })
+                        .then((response)=>{
+                            this.$router.push("/home");
                         })
 
             }

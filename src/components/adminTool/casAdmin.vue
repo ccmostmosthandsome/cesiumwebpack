@@ -5,6 +5,8 @@ import mixQuestions from "./mixQuestions"
 import mixAuth from "../../auth/mixAuth"
 import clientGrid from "../grids/clientGrid.vue";
 import clientModal from "../layout/clientModal.vue"
+import mixPersistence from '../../mixins/mixPersistence';
+
 export default {
     name: 'casAdmin',
     data: function () {
@@ -12,11 +14,44 @@ export default {
             latex: null,
             modalstatus: false,
             //id	question	answer	selections	explanation	coursetype	modtype	type
+
+            contractQuestionModel: {
+                qcontractName: null,
+                qcontractValue_1: null,
+                qcontractType: null,
+                qcontractModel: null
+            },
+            contractQuestionSchema: {
+                fields: [
+                    {
+                        type: "input",
+                        label: "Question Name",
+                        model: "qcontractName"
+                    },
+                    {
+                        type: "input",
+                        label: "Form Model Name",
+                        model: "qcontractModel"
+                    },
+                    {
+                        type: "select",
+                        label: "form type",
+                        model: "qcontractType",
+                        values: ["select", "text", "text-area"]
+                    },
+                    {
+                        type: "input",
+                        label: "Question Value(s)",
+                        model: "qcontractValue_1"
+                    },
+
+                ]
+            },
             manageQuestionModel: {
                 id: null,
                 question: null,
                 answer: null,
-                selection: null,
+                selections: [],
                 explanation: null,
                 coursetype: null,
                 modtype: null,
@@ -44,6 +79,11 @@ export default {
                         label: "coursetype",
                         model: "coursetype",
                         values: ["Math", "Science", "Language", "Civics"]
+                    },
+                    {
+                        type: "select",
+                        label: "Selections",
+                        model: "selections"
                     },
                     {
                         type: "select",
@@ -105,7 +145,8 @@ export default {
                 coursetype: null,
                 modtype: null,
                 answer: null,
-                explanation: null
+                explanation: null,
+                questionValue_1: null,
 
             },
             questionFormSchema: {
@@ -136,6 +177,11 @@ export default {
                         type: "text-area",
                         label: "Explanation",
                         model: "explanation"
+                    },
+                    {
+                        type: "input",
+                        label: "Selection Value",
+                        model: "questionValue_1"
                     }
                 ]
             },
@@ -179,9 +225,46 @@ export default {
     },
     components: { clientModal, clientGrid },
     methods: {
+        addSelectionValue(form) {
+            //Mutates state
+            let model = form + 'Model',
+                schema = form + 'Schema';
+            let questionNumbers = this.addSelectionValue_getIndexes(model);
+            this.addSelectionValue_setNewValue(questionNumbers, model, schema)
+        },
+        addSelectionValue_getIndexes(model) {
+            console.log("dingo")
+            return Object.keys(this[model])
+                .reduce((acc, curr) => {
+                    var indexNum = +curr.split('_')[1]
+                    if (!isNaN(indexNum)) {
+                        indexNum++
+                        acc.push(indexNum);
+                    }
+                    return acc;
+                }, []);
+        },
+        addSelectionValue_setNewValue(numbers, model, schema) {
+            numbers.forEach((questionIndex) => {
+                console.log("question index=>", questionIndex, !this.contractQuestionModel["qcontractValue_" + questionIndex], this.contractQuestionModel);
+                if (this[model]["selectvalue_" + questionIndex] === undefined) {
+                    this[model]["selectvalue_" + questionIndex] = null;
+                    this[schema].fields.push(
+                        {
+                            "type": 'input',
+                            "model": 'selectvalue_' + questionIndex,
+                            "label": 'Value'
+                        }
+                    )
+
+                }
+
+
+            })
+        },
         addQuestionMaterial() {
-            
-            
+
+
 
             this.questionMaterialModel.id = Math.floor(Math.random() * 33007);
             let request = new Request('/services/questions/add/content', {
@@ -191,7 +274,7 @@ export default {
                 body: JSON.stringify(this.questionMaterialModel),
                 headers: this.getAuthHeader()
             });
-            
+
             console.log("request?", request);
             fetch(request)
                 .then((response) => {
@@ -200,13 +283,24 @@ export default {
             //Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy that can later be released to fuel the organisms' activities (energy transformation). This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water – hence the name photosynthesis, from the Greek φῶς, phōs, "light", and σύνθεσις, synthesis, "putting together".In most cases, oxygen is also released as a waste product. Most plants, most algae, and cyanobacteria perform photosynthesis; such organisms are called photoautotrophs. Photosynthesis is largely responsible for producing and maintaining the oxygen content of the Earth's atmosphere, and supplies all of the organic compounds and most of the energy necessary for life on Earth.
         },
         createQuestion() {
-            this.questionFormModel.selections = [];
-            for (var field in this.selectionFormModel) {
-                if (field !== "id") {
-                    this.questionFormModel.selections.push(this.selectionFormModel[field]);
+
+
+          this.questionFormModel.selections = this.questionFormSchema.fields.reduce((acc, curr) => {
+
+
+
+                let value = +curr.model.split('_')[1];
+
+
+                if (!isNaN(value)) {
+
+                    acc.push(this.questionFormModel[curr.model]);
+
                 }
 
-            }
+                return acc;
+            }, [])
+
             //Remove id field to leave only selections in array.
             this.questionFormModel.id = Math.floor(Math.random() * 30000);
             this.questionFormModel.questionId = Math.floor(Math.random() * 33007);
@@ -255,10 +349,10 @@ export default {
             console.log("dingo")
             console.log("dingo")
             console.log("dingo")
-            for (var i in this.manageQuestionModel) {
+            this.manageQuestionModel = Object.assign(this.manageQuestionModel, {});
 
-                this.$set(this.manageQuestionModel, i, event[i])
-            }
+            this.manageQuestionModel = _.merge(this.manageQuestionModel, event);
+            console.log("managequestion model", this.manageQuestionModel, event);
             console.log("dingo")
             console.log("dingo")
             console.log("dingo")
@@ -267,7 +361,13 @@ export default {
         },
         handleModal(event) {
 
-            const requestLogin = {
+            console.log("dingo")
+            console.log("dingo")
+            console.log("dingo")
+            let storeQuestion = this.$store.getters.question('GED', this.manageQuestionModel.id);
+            this.manageQuestionModel.questionId = storeQuestion.questionId;
+
+            const update = {
                 method: 'PUT',
                 mode: 'cors',
                 redirect: 'follow',
@@ -275,7 +375,10 @@ export default {
                 headers: this.getAuthHeader()
             }
 
-            fetch('/services/questions/update', requestLogin)
+            console.log("dingo")
+            console.log("dingo")
+            console.log("dingo")
+            fetch('/services/questions/update', update)
                 .then((response) => {
                     if (response.OK) {
                         return response.json()
@@ -297,6 +400,43 @@ export default {
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
             });
 
+        },
+        submitContractQuestion() {
+
+
+            this.contractQuestionModel.qcontractValues = this.contractQuestionSchema.fields.reduce((acc, curr) => {
+
+
+
+                let value = +curr.model.split('_')[1];
+
+
+                if (!isNaN(value)) {
+
+                    acc.push(this.contractQuestionModel[curr.model]);
+
+                }
+
+                return acc;
+            }, [])
+            let questionObject = {
+                qcontractName: this.contractQuestionModel.qcontractName,
+                qcontractValues: this.contractQuestionModel.qcontractValues,
+                qcontractType: this.contractQuestionModel.qcontractType,
+                qcontractModel: this.contractQuestionModel.qcontractModel,
+                qcontractId: Math.floor(Math.random() * 3307)
+            }
+
+
+            this.persistencePost('services/contract/quesiton/add', questionObject)
+                .then((response) => {
+                    console.log("Question added from admin tool");
+                })
+
+
+        },
+        test() {
+            console.log("clicked  button");
         },
         registerAdmin() {
 
@@ -328,7 +468,7 @@ export default {
                 })
         }
     },
-    mixins: [mixQuestions, mixAuth],
+    mixins: [mixQuestions, mixAuth, mixPersistence],
     mounted() {
         this.$nextTick(function () {
             MathJax.Hub.Typeset()
@@ -347,19 +487,21 @@ export default {
     
         <b-tabs small card ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
+                <div class="panel panel-default">
+                    <div class="panel panel-body">
+                        <vue-form-generator :schema="questionFormSchema" :model="questionFormModel"></vue-form-generator>
+                        </br>
     
-                <vue-form-generator :schema="questionFormSchema" :model="questionFormModel"></vue-form-generator>
-                </br>
-                <label>Add Selections</label>
-                <vue-form-generator :schema="selectionFormSchema" :model="selectionFormModel"></vue-form-generator>
-                <button class="btn btn-default" @click="showMathJax()">Update Mathjax</button>
-                <br/>
-                <br/>
-                <label>Check Latex</label>
-                <textarea v-model="latex" />
-                <p>Result... {{latex}}</p>
-                <hr/>
-                <button class="btn btn-primary" @click="createQuestion">submit</button>
+                    </div>
+                    <div class="panel panel-footer">
+                        <button class="btn btn-default" @click="addSelectionValue('questionForm')">Add Value</button>
+    
+                        <button class="btn btn-primary" @click="createQuestion">submit</button>
+                    </div>
+    
+                </div>
+    
+    
             </b-tab>
             <b-tab title="Add Question Content">
                 <div class="content">
@@ -378,17 +520,21 @@ export default {
                 </div>
     
             </b-tab>
-            <b-tab title="Modify Schema">
-                Schema!
-            </b-tab>
-            <b-tab title="Manage Questions">
+            <b-tab title="Create Contract Questions">
                 <div class="panel panel-default">
                     <div class="panel panel-body">
-                        <client-grid gridid="adminQuestions" v-on:rowSelected="openModal"></client-grid>
+                        <vue-form-generator :schema="contractQuestionSchema" :model="contractQuestionModel" />
                     </div>
                     <div class="panel panel-footer">
-                        <button class="btn btn-primary" @click="getQuestions">Get Questions...</button>
+                        <button class="btn btn-default" @click="addSelectionValue('contractQuestion')">Add Value</button>
+                        <button class="btn btn-default" @click="submitContractQuestion">Submit</button>
+    
                     </div>
+                </div>
+            </b-tab>
+            <b-tab title="M Shapening Questions" @click="getQuestions">
+                <div style="overflow-x: scroll">
+                    <client-grid gridid="adminQuestions" v-on:rowSelected="openModal"></client-grid>
     
                 </div>
     

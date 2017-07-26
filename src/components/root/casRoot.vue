@@ -62,6 +62,7 @@ export default {
                 console.log("logging out...");
                 // this.userAccount = ??{};
                 this.$store.dispatch('logout');
+                this.$router.push('/');
                 // this.labels = {"unchecked" : 'Login', "checked" : 'Logout'}          
             } else {
                 this.$router.push('/login');
@@ -133,8 +134,18 @@ export default {
     mixins: [mixAuth, mixDropDown],
     mounted() {
 
+        this.$store.dispatch("fetchContractAnswers",this.account.sub)
+            .then(()=>{
+
+            })
+
         this.$store.dispatch("getQuestions", 'GED')
             .then((response) => {
+                console.log("debug")
+                console.log("debug")
+                console.log("debug")
+                console.log("debug")
+                console.log("debug")
                 this.loading = false;
                 this.createTree();
 
@@ -190,6 +201,7 @@ export default {
         <client-navbar>
     
             <span slot="right" style="display: inline-block;">
+                
                 <cas-palmadoro></cas-palmadoro>   
                 <span v-if="isLoggedIn" class="navBarDisplay">
                     <span>
@@ -210,7 +222,7 @@ export default {
             </span>
     
         </client-navbar>
-        <cas-traditionallayout>
+        <cas-traditionallayout :asideViews="['questionView']">
             <div slot="sidebar">
     
                 <ul class="nav navbar-nav" id="sidenav01">
@@ -221,14 +233,16 @@ export default {
                     </li>
                     <li>
                         <router-link to="/map">
-                            <span class="glyphicon glyphicon-road"></span> Map Cesium
+                            <span class="glyphicon glyphicon-road"></span> Life Map
                         </router-link>
                     </li>
                     <li>
                         <router-link :to="{name: 'questionView', params: {model : tree, menuSchema : schema.menuSchema, showRoot: false}}">
                             <span class="glyphicon glyphicon-list-alt"></span> Questions
     
-                            <router-view name="treeMenu"></router-view>
+                            <router-view name="treeMenu" >
+
+                            </router-view>
                         </router-link>
                     </li>
                     <li v-if="isAdmin">
@@ -246,8 +260,8 @@ export default {
     
                 <router-view :questions="questionsByCourse"></router-view>
             </div>
-            <div slot="aside">
-    
+            <div slot="aside" >
+                
                 <router-view name="aside" :course="coursetype">
     
                 </router-view>

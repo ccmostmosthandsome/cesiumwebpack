@@ -13,24 +13,32 @@ const state = {
     accountRoles: [],
     course: {},
     questions: {},
+    contractQuestions: [],
+    contractAnswers: [],
     hints: {},
     dropdownPayload: {}
 }
 
 const mutations = {
+    QUESTIONS_CONTRACT(state, payload) {
+        state.contractQuestions = payload;
+    },
+    ANSWERS_CONTRACT(state,payload){
+        state.contractAnswers = payload;
+    },
     UPDATE_HINT(state, payload) {
 
-        if(!state.hints[payload.coursetype]){
-            Vue.set(state.hints,payload.coursetype,[]);
+        if (!state.hints[payload.coursetype]) {
+            Vue.set(state.hints, payload.coursetype, []);
         }
-        let hintExists = state.hints[payload.coursetype].some((hint)=>{
-            if(!hint.questionId){
+        let hintExists = state.hints[payload.coursetype].some((hint) => {
+            if (!hint.questionId) {
                 return false
-            } 
+            }
             return hint.questionId === payload.questionId;
         })
 
-        !hintExists ? state.hints[payload.coursetype].push(payload) : state.hints[payload.coursetype] = state.hints[payload.coursetype]; 
+        !hintExists ? state.hints[payload.coursetype].push(payload) : state.hints[payload.coursetype] = state.hints[payload.coursetype];
     },
     REMOVE_HINT(state, payload) {
         state.hints[payload.coursetype] = state.hints[payload.coursetype].filter(hint => hint.questionId !== payload.questionId);
@@ -42,6 +50,10 @@ const mutations = {
         Vue.set(state.questions, returnObject.type, returnObject.records);
     },
     changeColumns(state, col) {
+        console.log("dingo dingo")
+        col.columns = col.columns.filter(function(col){
+               return col.name.trim() !== 'sum' && col.name.trim() !== 'storeid';
+        });
         Vue.set(state.tableColumns, col.storeid, col.columns);
 
     },
@@ -62,6 +74,7 @@ const mutations = {
     },
     LOGOUT(state) {
         state.isLoggedIn = false;
+        state.contractAnswers = [];
     },
     CHANGE_ACCOUNT(state, account) {
         state.account = {};
@@ -84,13 +97,24 @@ const actions = {
             columns: []
         };
         for (var i in state.name) {
+            let columnDisplayName = state.name[i].display || i;
+            let firstLetter = columnDisplayName.charAt(0);
+            let upperCase = firstLetter.toUpperCase();
+            columnDisplayName = upperCase + columnDisplayName.slice(1);
+                        console.log("dingo")
+
+            console.log("dingo")
+
             var columnObject = {
                 name: i,
-                displayName: state.name[i].display
+                displayName: columnDisplayName,
+                order: state.name[i].order
             }
 
             returnObject.columns.push(columnObject)
         }
+
+
         //  if (state.name.type === "manySelection") {
         //      returnObject.columns.splice(0, 0, { name: "checked", displayName: null })
         //  }
@@ -100,8 +124,8 @@ const actions = {
     },
     changeAccount: ({ commit }, state) => commit('CHANGE_ACCOUNT', state),
     changeCourse: ({ commit }, state) => commit('CHANGE_COURSE', state),
-    updateHint: ({commit}, state) => commit('UPDATE_HINT',state),
-    removeHint: ({commit}, state) => commit('REMOVE_HINT',state),
+    updateHint: ({ commit }, state) => commit('UPDATE_HINT', state),
+    removeHint: ({ commit }, state) => commit('REMOVE_HINT', state),
     getByCourse: ({ commit }, course) => {
         return new Promise(resolve => {
             let request = new Request('/services/questions/get/coursetype?coursetype=' + course, {
@@ -121,12 +145,68 @@ const actions = {
                         type: course,
                         records: response
                     }
-                    
+
                     commit('ADD_QUESTIONS', returnObject);
                     resolve();
                 })
         });
 
+    },
+    fetchContractAnswers: ({ commit }, userid) => {
+        return new Promise(resolve => {
+            let request = new Request('services/contract/answer/list/user?userid=' + userid, {
+                method: 'GET',
+                mode: 'cors',
+                redirect: 'follow',
+                headers: {
+                    'X-Auth-Token': localStorage.getItem('token'),
+                    'Content-Type': 'application/json'
+                }
+            });
+            fetch(request)
+                .then((response)=>{
+                    if(response.ok){
+                        return response.json()
+                    }
+                    throw(response);
+                })
+                .then((response)=>{
+                    commit('ANSWERS_CONTRACT',response);
+                    resolve();
+                })
+                .catch((exception)=>{
+                    console.log("Exception getting questions",exception);
+                })
+
+        })
+    },
+    fetchContractQuestions: ({ commit }) => {
+        return new Promise(resolve => {
+            let request = new Request('services/contract', {
+                method: 'GET',
+                mode: 'cors',
+                redirect: 'follow',
+                headers: {
+                    'X-Auth-Token': localStorage.getItem('token'),
+                    'Content-Type': 'application/json'
+                }
+            });
+            fetch(request)
+                .then((response)=>{
+                    if(response.ok){
+                        return response.json()
+                    }
+                    throw(response);
+                })
+                .then((response)=>{
+                    commit('QUESTIONS_CONTRACT',response);
+                    resolve();
+                })
+                .catch((exception)=>{
+                    console.log("Exception getting questions",exception);
+                })
+
+        })
     },
     getQuestions: ({ commit }, type) => {
         return new Promise(resolve => {
@@ -218,7 +298,17 @@ const actions = {
         })
     }
 }
-
+/**
+ * 
+ * .filter(function(){
+            val name = col.name.trim();
+            console.log("dingo")
+             console.log("dingo")
+              console.log("dingo")
+               console.log("dingo")
+               return name !== 'sum' || name !== 'storeid';
+        });
+ */
 const getters = {
     dropdownPayload: state => {
         return state.dropdownPayload;
@@ -229,20 +319,33 @@ const getters = {
     isAdmin: state => {
         return state.isAdmin;
     },
+    isContractRegistered: state =>{
+        return state.contractAnswers.length > 0
+    },
     getColState: (state, getters) => (storeid) => {
-        return state.tableColumns[storeid];
+
+        console.log("dingo")
+        console.log("dingo")
+        console.log("dingo")
+        console.log("dingo")
+
+        return state.tableColumns[storeid]
     },
     questions: (state, getters) => (questionid) => {
         return state.questions[questionid];
     },
+    question:(state, getters) => (storeid, id) =>{
+        let question = state.questions[storeid].filter((question)=>{
+            return question.id = id;
+        });
+
+        return question[0];
+    },
     getRowState: (state, getters) => (storeid) => {
         return state.tableRows[storeid];
     },
-    getCourseHints: (state,getters) => (coursetype) =>{
-        console.log("dingo")
-                console.log("dingo")
-                        console.log("dingo")
-                                console.log("dingo")
+    getCourseHints: (state, getters) => (coursetype) => {
+
         return state.hints[coursetype];
     }
 }

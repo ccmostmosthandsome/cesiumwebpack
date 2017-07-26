@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
     methods: {
         questionsGrid() {
@@ -16,18 +18,26 @@ export default {
                 })
                 .then(response =>{
                     console.log("dingo");
+
+                    //TODO: Use lodash utility for this.
                     let mockColumns = response.reduce((acc,curr)=>{
                         Object.keys(curr).forEach(key=>{
-                            !acc[key] ? acc.sum++ : '';
+                            !acc[key] ? acc.sum++ : acc = acc;
                             !acc[key] ? acc[key] = {"display" : key, "sort" : false, "order" : acc.sum} : acc[key] = acc[key];
 
                         });
                         
                         return acc; 
                     },{sum: 0, storeid: "adminQuestions"})
+
+                    let rows = response.map((question)=>{
+
+                        return _.pick(question,Object.keys(mockColumns));
+                        
+                    });
                     let mockRows = {
                        storeid: "adminQuestions",
-                       rows:  response
+                       rows:  rows
                     }; 
                     console.log("dingo");
                     this.$store.dispatch('changeColumns',{name: mockColumns});

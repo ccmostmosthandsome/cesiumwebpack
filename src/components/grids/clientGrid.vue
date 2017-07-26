@@ -4,6 +4,7 @@
 <script>
 
 import { mapGetters } from 'vuex';
+import _ from 'lodash'
 export default {
     name: 'clientGrid',
     props: ['type','gridid'],
@@ -27,8 +28,8 @@ export default {
 }
 </script>
 <template>
-    <div>
-        
+    <div style="x-overflow: scroll;">
+
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -38,9 +39,11 @@ export default {
             <tbody>
                 <tr v-for="(row, index) in rows" v-bind:key="index" @click="talkToParent(row)">
                     
-                    <td v-for="(type,ky) in row" v-bind:key="ky" >
-                        {{type}}
-                    </td>
+                        <td v-for="(type,ky) in row" v-bind:key="ky" >
+                            {{type}}
+                        </td>
+                   
+
     
                 </tr>
             </tbody>

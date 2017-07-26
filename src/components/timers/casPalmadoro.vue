@@ -38,7 +38,7 @@ export default {
            
             this.minutes = Math.floor(this.count / 60)
             
-            console.log("min min ???",Math.floor(this.count / 60) )
+            //console.log("min min ???",Math.floor(this.count / 60) )
             
             this.seconds = Math.floor((this.count) % 60);
             return this.minutes + ":" + (this.seconds < 10 ? '0' : '') + this.seconds;
@@ -46,7 +46,7 @@ export default {
     },
     computed: {
         timer() {
-            console.log(this.convertTime(),this.count);
+           // console.log(this.convertTime(),this.count);
             return this.convertTime();
             /*
             let duration = moment.duration(this.count, 'milliseconds');
