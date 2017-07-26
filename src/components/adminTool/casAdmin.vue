@@ -4,13 +4,20 @@ import VueFormGenerator from "../vue-form-generator";
 import mixQuestions from "./mixQuestions"
 import mixAuth from "../../auth/mixAuth"
 import clientGrid from "../grids/clientGrid.vue";
-import clientModal from "../layout/clientModal.vue"
+import clientModal from "../layout/clientModal.vue";
+import clientRadio from "../buttons/clientRadio.vue";
+import clientFileselect from "../buttons/clientFileselect.vue"
 import mixPersistence from '../../mixins/mixPersistence';
 
 export default {
     name: 'casAdmin',
     data: function () {
         return {
+            questionScreen: false,
+            radioNewQuestion: [
+                { text: 'Upload Questions', value: 'upload'},
+                { text: 'Enter New Question', value: 'input'},
+            ],
             latex: null,
             modalstatus: false,
             //id	question	answer	selections	explanation	coursetype	modtype	type
@@ -223,8 +230,15 @@ export default {
 
         }
     },
-    components: { clientModal, clientGrid },
+    components: { clientModal, clientGrid, clientRadio, clientFileselect },
     methods: {
+        handleFileUpload(file){
+            console.log("caught file upload",file);
+        },
+        displayQuestionScreen(selected){
+            console.log("dingo this was selected...",selected);
+            this.questionScreen = selected;
+        },
         addSelectionValue(form) {
             //Mutates state
             let model = form + 'Model',
@@ -488,8 +502,19 @@ export default {
         <b-tabs small card ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
                 <div class="panel panel-default">
+                    <div class="panel panel-header">
+                        <h3>Add Question or Upload Questions</h3>
+                        <client-radio :options="radioNewQuestion" @radioSelected="displayQuestionScreen"></client-radio>
+                    </div>
                     <div class="panel panel-body">
-                        <vue-form-generator :schema="questionFormSchema" :model="questionFormModel"></vue-form-generator>
+                        <div v-if="questionScreen === 'input'">
+                            <vue-form-generator :schema="questionFormSchema" :model="questionFormModel"></vue-form-generator>
+
+                        </div>
+                        <div v-if="questionScreen === 'upload'">
+                            <p>Uploading Content</p>
+                            <client-fileselect @input="handleFileUpload"/>
+                        </div>
                         </br>
     
                     </div>
