@@ -11,6 +11,18 @@ module.exports = {
         //filename: "bundle.js"
         filename: '[name].min.js'
     },
+    node: {
+        fs: 'empty'
+    },
+    externals: [
+        {
+            './cptable': 'var cptable',
+
+        },
+        {
+            './jszip' : 'jszip'
+        }
+    ],
     devtool: 'eval-source-map',
     resolve: {
         alias: {
