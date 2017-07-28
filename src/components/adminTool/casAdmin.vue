@@ -3,7 +3,6 @@
 import VueFormGenerator from "../vue-form-generator";
 import mixQuestions from "./mixQuestions";
 import mixAuth from "../../auth/mixAuth";
-import mixXls from "../../mixins/mixXls.js"
 import clientGrid from "../grids/clientGrid.vue";
 import clientModal from "../layout/clientModal.vue";
 import clientRadio from "../buttons/clientRadio.vue";
@@ -234,8 +233,7 @@ export default {
     components: { clientModal, clientGrid, clientRadio, clientFileselect },
     methods: {
         handleFileUpload(file){
-            console.log("caught file upload",Object.keys(file),file.name);
-            this.handleXlsx(file,true);
+            console.log("caught file upload",file);
         },
         displayQuestionScreen(selected){
             console.log("dingo this was selected...",selected);
@@ -484,7 +482,7 @@ export default {
                 })
         }
     },
-    mixins: [mixQuestions, mixAuth, mixPersistence, mixXls],
+    mixins: [mixQuestions, mixAuth, mixPersistence],
     mounted() {
         this.$nextTick(function () {
             MathJax.Hub.Typeset()
@@ -515,7 +513,7 @@ export default {
                         </div>
                         <div v-if="questionScreen === 'upload'">
                             <p>Uploading Content</p>
-                            <client-fileselect @input="handleFileUpload"/>
+                            <client-fileselect @input="handleFileUpload" type="excel"/>
                         </div>
                         </br>
     

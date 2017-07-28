@@ -9,16 +9,17 @@
 </template>
 
 <script>
-import jszip from 'jszip';
-import XLSX from 'xlsx';
+import mixXlsx from '../../mixins/mixXlsx'
+
 export default {
     data: function () {
         return {
-            reader: null,
-            obj: {}
+            reader: null
         }
     },
     methods: {
+
+        /*
         to_json(workbook){
             var result = {};
             workbook.SheetNames.forEach(function(sheetName) {
@@ -57,30 +58,21 @@ export default {
                 'col_size': range.e.c + 1,
                 'row_size': range.e.r + 1
             }
-        },
+        },*/
         handleFileChange(e) {
             //this.value = e;
-            console.log("Caught onchange event....", e);
-            this.reader.readAsArrayBuffer(e.target.files[0]);
-            this.reader.onload = function (e) {
-                var data = e.target.result;
-                var arr = String.fromCharCode.apply(null, new Uint8Array(data));
-                console.log("XLSX?", XLSX, Object.keys(XLSX))
-                var workbook = XLSX.read(btoa(arr), {
-                    type: 'base64'
-                });
 
-                console.log("dingo");
-                 console.log("dingo");
-                  console.log("dingo");
-                   console.log("dingo");
-                    console.log("dingo",this);
-                this.obj.sheets = this.parseWorkbook(workbook, true, true);
-                console.log("obj =>", this.obj);
-                //handler(obj);
-            }.bind(this)
+            if (this.type === 'excel') {
+                this.reader = new FileReader();
+                console.log("Caught onchange event....", e);
+                this.reader.readAsArrayBuffer(e.target.files[0]);
+                this.reader.onload = this.etlExcel.call(this,e);
+
+            }
+
             //this.$emit('input', e.target.files[0]);
         },
+        /*
         parseWorkbook(workbook, readCells, toJSON) {
             if (toJSON === true) {
                 return this.to_json(workbook);
@@ -105,16 +97,13 @@ export default {
 
 
             return sheets;
-        }
+        } */
     },
-    mounted() {
-        console.log("creating new file reader");
-        this.reader = new FileReader();
-        console.log("Created file reader");
-    },
+    mixins: [mixXlsx],
     name: 'clientFileselect',
     props: {
-        value: File
+        value: File,
+        type: String
     }
 }
 </script>
@@ -131,6 +120,7 @@ export default {
     text-align: center;
     font-weight: bold;
 }
+
 
 
 
