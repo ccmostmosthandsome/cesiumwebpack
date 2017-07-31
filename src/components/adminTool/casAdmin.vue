@@ -7,17 +7,31 @@ import mixXls from "../../mixins/mixXls.js"
 import clientGrid from "../grids/clientGrid.vue";
 import clientModal from "../layout/clientModal.vue";
 import clientRadio from "../buttons/clientRadio.vue";
-import clientFileselect from "../buttons/clientFileselect.vue"
+import clientSpinner from "../spinner/clientSpinner.vue";
+import clientFileselect from "../buttons/clientFileselect.vue";
+import clientAccordion from "../layout/clientAccordion.vue";
 import mixPersistence from '../../mixins/mixPersistence';
+import mixGrids from '../../mixins/mixGrids'
+import { EventBus } from '../../eventbus/index';
 
 export default {
     name: 'casAdmin',
+    computed: {
+        spinnerLoading() {
+            return this.$store.getters.getLoading;
+        }
+    },
     data: function () {
         return {
+            editorValue: null,
+            editorContent: "<h4>Editor</h4>",
+            loading: false,
+            submit: 'question',
+            bulkExcelDocuments: {},
             questionScreen: false,
             radioNewQuestion: [
-                { text: 'Upload Questions', value: 'upload'},
-                { text: 'Enter New Question', value: 'input'},
+                { text: 'Upload Questions', value: 'upload' },
+                { text: 'Enter New Question', value: 'input' },
             ],
             latex: null,
             modalstatus: false,
@@ -156,13 +170,17 @@ export default {
                 explanation: null,
                 questionValue_1: null,
 
+
             },
             questionFormSchema: {
                 fields: [
                     {
-                        type: "text-area",
-                        label: "Question",
+                        type: "editor",
+                        label: "Create Question,",
                         model: "question",
+                        height: 200,
+                        content: "<h3>Question Editor</h3>"
+
                     },
                     {
                         type: "select",
@@ -177,9 +195,12 @@ export default {
                         values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
                     },
                     {
-                        type: "input",
-                        label: "Question Answer",
+                        type: "editor",
+                        label: "Answer",
                         model: "answer",
+                        height: 200,
+                        content: "<h3>Answer</h3>"
+
                     },
                     {
                         type: "text-area",
@@ -231,14 +252,28 @@ export default {
 
         }
     },
-    components: { clientModal, clientGrid, clientRadio, clientFileselect },
+    components: {
+        clientModal,
+        clientGrid,
+        clientRadio,
+        clientFileselect,
+        clientSpinner,
+        clientAccordion
+    },
     methods: {
-        handleFileUpload(file){
-            console.log("caught file upload",Object.keys(file),file.name);
-            this.handleXlsx(file,true);
+        getEditorValue(data) {
+            console.log(" this is the data =>", data);
         },
-        displayQuestionScreen(selected){
-            console.log("dingo this was selected...",selected);
+        handleFileUpload(file) {
+            console.log("handling spreadsheet", file);
+
+            this.$set(this.bulkExcelDocuments, 'sheets', file.sheets);
+            this.submit = "bulk";
+
+
+        },
+        displayQuestionScreen(selected) {
+            console.log("dingo this was selected...", selected);
             this.questionScreen = selected;
         },
         addSelectionValue(form) {
@@ -278,6 +313,74 @@ export default {
 
             })
         },
+        bulkAddQuestion() {
+            this.loading = true;
+            let normalizedQuestions = this.bulkExcelDocuments.sheets.Questions.map(function (newquestion) {
+                console.log("dingo");
+                let selections = this.bulkExcelDocuments
+                    .sheets
+                    .Selections.filter(selection => selection.QuestionID === newquestion.ID)
+                    .reduce((acc, curr) => {
+                        console.log("curr", curr, curr[0])
+                        for (var selection in curr) {
+                            console.log("selection", selection)
+                            if (selection !== 'QuestionID') {
+                                acc.push(curr[selection]);
+                            }
+
+                        }
+
+                        return acc;
+                    }, []);
+
+                return {
+                    question: newquestion.Question,
+                    answer: newquestion.Answer,
+                    selections: selections,
+                    explanation: newquestion.Explanation,
+                    coursetype: newquestion.CourseType,
+                    modtype: newquestion.Module,
+                    questionId: newquestion.ID,
+                    creator: this.account.sub
+                }
+            }.bind(this))
+
+            let normalizedContent = this.bulkExcelDocuments.sheets.Content.map(function (content) {
+                return {
+                    questionId: content.QuestionID,
+                    questionhint: content.Hint,
+                    videoHint: content.Video,
+                    creator: this.account.sub
+
+                }
+            }.bind(this))
+
+
+            Promise.all(normalizedQuestions.map((question => {
+                console.log("###########Question#########", question);
+                return this.persistencePost('/services/questions/add', question)
+            })))
+                .then((response) => {
+                    console.log("dingo", this.bulkExcelDocuments.sheets.Questions[0]);
+                    console.log("dingo", normalizedQuestions);
+
+                    console.log("dingo")
+
+                    console.log("dingo")
+
+                    console.log("dingo")
+                    console.log("all promises complete!!", response);
+                    return Promise.all(normalizedContent.map((content) => {
+                        console.log("###########Content#########", content);
+                        return this.persistencePost('/services/questions/add/content', content);
+                    }))
+                })
+                .then((response) => {
+                    console.log("###########Completed#########", response);
+                    this.loading = false;
+                })
+
+        },
         addQuestionMaterial() {
 
 
@@ -301,7 +404,7 @@ export default {
         createQuestion() {
 
 
-          this.questionFormModel.selections = this.questionFormSchema.fields.reduce((acc, curr) => {
+            this.questionFormModel.selections = this.questionFormSchema.fields.reduce((acc, curr) => {
 
 
 
@@ -484,11 +587,13 @@ export default {
                 })
         }
     },
-    mixins: [mixQuestions, mixAuth, mixPersistence, mixXls],
+    mixins: [mixQuestions, mixAuth, mixPersistence, mixXls, mixGrids],
     mounted() {
         this.$nextTick(function () {
             MathJax.Hub.Typeset()
-        })
+        });
+
+
     }
 }
 
@@ -501,7 +606,7 @@ export default {
 <template>
     <div>
     
-        <b-tabs small card ref="tabs" v-model="tabIndex">
+        <b-tabs  ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
                 <div class="panel panel-default">
                     <div class="panel panel-header">
@@ -509,25 +614,52 @@ export default {
                         <client-radio :options="radioNewQuestion" @radioSelected="displayQuestionScreen"></client-radio>
                     </div>
                     <div class="panel panel-body">
-                        <div v-if="questionScreen === 'input'">
+                        <div v-if="questionScreen === 'input' && spinnerLoading === false">
                             <vue-form-generator :schema="questionFormSchema" :model="questionFormModel"></vue-form-generator>
-
                         </div>
-                        <div v-if="questionScreen === 'upload'">
-                            <p>Uploading Content</p>
-                            <client-fileselect @input="handleFileUpload"/>
+                        <div v-if="questionScreen === 'upload' && spinnerLoading === false">
+                            <client-accordion>
+                                <panel is-open type="primary">
+                                    <strong slot="header">
+                                        <u>Panel #1</u>
+                                    </strong>
+                                    
+                                </panel>
+                            </client-accordion>
+                            <div class="btn-group" role="group" aria-label="Bulk Upload Group Bar">
+    
+                                <div style="display: inline-block;">
+                                    <client-fileselect @input="handleFileUpload" type="excel" />
+                                </div>
+    
+                            </div>
+    
                         </div>
-                        </br>
+                        <div v-if="spinnerLoading">
+                            <client-spinner></client-spinner>
+                        </div>
+                        
     
                     </div>
                     <div class="panel panel-footer">
-                        <button class="btn btn-default" @click="addSelectionValue('questionForm')">Add Value</button>
+                        <span v-if="questionScreen==='input'">
+                            <button class="btn btn-default" @click="addSelectionValue('questionForm')">Add Value</button>
     
-                        <button class="btn btn-primary" @click="createQuestion">submit</button>
+                            <button class="btn btn-primary" @click="createQuestion">Submit Question</button>
+                        </span>
+                        <span v-else-if="questionScreen === 'upload'">
+                            <button class="btn btn-primary" @click="bulkAddQuestion">Upload Excel Questions</button>
+    
+                        </span>
+                        <span v-else>
+                            <label>
+                                <h4>Select a Value</h4>
+                            </label>
+                        </span>
+    
                     </div>
     
                 </div>
-    
     
             </b-tab>
             <b-tab title="Add Question Content">
@@ -554,12 +686,12 @@ export default {
                     </div>
                     <div class="panel panel-footer">
                         <button class="btn btn-default" @click="addSelectionValue('contractQuestion')">Add Value</button>
-                        <button class="btn btn-default" @click="submitContractQuestion">Submit</button>
+                        <button class="btn btn-default" @click="submitContractQuestion" v-if="submit === 'question'">Submit -- {{submit}}</button>
     
                     </div>
                 </div>
             </b-tab>
-            <b-tab title="M Shapening Questions" @click="getQuestions">
+            <b-tab title="Sharpening Questions" @click="getQuestions">
                 <div style="overflow-x: scroll">
                     <client-grid gridid="adminQuestions" v-on:rowSelected="openModal"></client-grid>
     
@@ -568,12 +700,14 @@ export default {
             </b-tab>
     
         </b-tabs>
-        <client-modal modalid="Manage Questions" :open="modalstatus" :modalSchema="manageQuestionSchema" :modalModel="manageQuestionModel" ref="dialog" @modalSubmitted="handleModal">
-            <div slot="footer">
-                <button class="btn btn-warning" @click="deleteQuestion">Delete</button>
+        <span style="padding-top: 30px;">
+            <client-modal modalid="Manage Questions" :open="modalstatus" :modalSchema="manageQuestionSchema" :modalModel="manageQuestionModel" ref="dialog" @modalSubmitted="handleModal">
+                <div slot="footer">
+                    <button class="btn btn-warning" @click="deleteQuestion">Delete</button>
     
-            </div>
-        </client-modal>
+                </div>
+            </client-modal>
+        </span>
     
     </div>
 </template>

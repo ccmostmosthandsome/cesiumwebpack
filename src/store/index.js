@@ -16,10 +16,21 @@ const state = {
     contractQuestions: [],
     contractAnswers: [],
     hints: {},
-    dropdownPayload: {}
+    dropdownPayload: {},
+    file: null,
+    loading: false
 }
 
 const mutations = {
+    ADD_FILE(state, payload){
+        state.file = payload;
+    },
+    START_LOADING(state){
+        state.loading = true;
+    },
+    STOP_LOADING(state){
+        state.loading = false;
+    },
     QUESTIONS_CONTRACT(state, payload) {
         state.contractQuestions = payload;
     },
@@ -88,6 +99,9 @@ const mutations = {
 const actions = {
     //changeColumns: ({commit}, state) => commit('changeColumns',state),
     //changeRows: ({commit}, state) => commit('changeRows',state),
+    addFile: ({commit}, state) => commit('ADD_FILE',state),
+    startLoading: ({commit}, state) => commit('START_LOADING',state),
+    stopLoading: ({commit}, state) => commit('STOP_LOADING',state),
     sendDropdownPayload: ({ commit }, state) => commit('ADD_DROPDOWN_PAYLOAD', state),
     changeToken: ({ commit }, state) => commit('changeToken', state),
     changeRows: ({ commit }, state) => commit('changeRows', state),
@@ -298,17 +312,6 @@ const actions = {
         })
     }
 }
-/**
- * 
- * .filter(function(){
-            val name = col.name.trim();
-            console.log("dingo")
-             console.log("dingo")
-              console.log("dingo")
-               console.log("dingo")
-               return name !== 'sum' || name !== 'storeid';
-        });
- */
 const getters = {
     dropdownPayload: state => {
         return state.dropdownPayload;
@@ -324,10 +327,6 @@ const getters = {
     },
     getColState: (state, getters) => (storeid) => {
 
-        console.log("dingo")
-        console.log("dingo")
-        console.log("dingo")
-        console.log("dingo")
 
         return state.tableColumns[storeid]
     },
@@ -347,6 +346,12 @@ const getters = {
     getCourseHints: (state, getters) => (coursetype) => {
 
         return state.hints[coursetype];
+    },
+    getFile: state=>{
+        return state.file;
+    },
+    getLoading: state=>{
+        return state.loading;
     }
 }
 

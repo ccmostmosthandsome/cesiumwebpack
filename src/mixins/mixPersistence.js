@@ -21,13 +21,14 @@ export default {
                         if (response.OK) {
                             return response.json()
                         }
-                        reject('posersistence failed', response);
+                        return resolve('posersistence failed', response);
                     })
                     .then((response) => {
                        return  resolve(response);
                     })
                     .catch((response)=>{
                         console.log("Major failure here=>",response);
+                        return resolve(response);
                     })
 
             })

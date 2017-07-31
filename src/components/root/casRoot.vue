@@ -228,7 +228,7 @@ export default {
                 <ul class="nav navbar-nav" id="sidenav01">
                     <li>
                         <router-link to="/home">
-                            <span class="glyphicon glyphicon-home"></span> Home
+                            <i class="fa fa-home fa-fw"></i> Home
                         </router-link>
                     </li>
                     <li>

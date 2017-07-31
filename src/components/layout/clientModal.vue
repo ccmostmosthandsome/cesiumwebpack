@@ -1,6 +1,8 @@
+
+
 <template>
     
-    <b-modal  @ok="submit" @close="close" ref="modal">
+    <clienthack-Modal size="lg" @ok="submit" @close="close" ref="modal" :noAutoFocus=true>
         <div class="panel panel-default">
             <div class="panel panel-header">{{modalid}}</div>
             <div class="panel panel-body">
@@ -12,12 +14,14 @@
         </div>
         
         
-    </b-modal>
+    </clienthack-Modal>
 
 </template>
 
 <script>
+import clienthackModal from './clienthackModal.vue';
 export default {
+    components: {clienthackModal},
     props: ['modalSchema', 'modalModel','open','modalid'],
     methods: {
         submit(){

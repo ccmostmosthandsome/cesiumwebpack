@@ -41,10 +41,12 @@ export default {
     .dropdownCharacters {
         font-size: small;
     }
+
+
 </style>
 
 <template>
-    <b-dropdown text=""  class="m-md-2">
+    <b-dropdown text=""  class="m-md-2 dropdownLayout" >
         <b-dropdown-item  v-for="option in options.list" v-bind:value="option.id" v-bind:key="option.id" @click="notify(option,$event)">{{option.text}}</b-dropdown-item>
     </b-dropdown>
 </template> 

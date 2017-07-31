@@ -141,6 +141,7 @@ export default {
 </script>
 <style>
 .treeCharacters {
-    font-size: small;
+    font-size: x-small;
+    font-weight: 200; 
 }
 </style>

@@ -179,14 +179,14 @@ export default {
         </div>
       </div>
       <div :class="contentCol" style="overflow-y: scroll">
-        <div class="container">
+        
           <div class="page-header viewPort">
   
             <slot name="content"></slot>
   
           </div>
   
-        </div>
+        
       </div>
       <div class="col-sm-9 col-md-3 affix-content" style="overflow-y: scroll" v-if="asideViews.indexOf($route.name) > -1">
         <div class="container">

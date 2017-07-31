@@ -8,44 +8,34 @@ export default {
         }
     },
     methods: {
-        handleXlsx(file ,showPreview) {
-            
-            
-            console.log("file keys",file);
-            return this.intializeFromFile(file, showPreview, false, function (data) {
-                console.log("dingo");
-                console.log("dingo");
-                console.log("dingo");
-                console.log("dingo");
-                return data;
-
-            })
-
+        encodeWorkbook(bits) {
+            var data = bits;
+            var arr = String.fromCharCode.apply(null, new Uint8Array(data));
+            return XLSX.read(btoa(arr), {
+                type: 'base64'
+            });
 
 
         },
-        intializeFromFile(obj, file, readCells, toJSON, handler) {
-            var reader = new FileReader();
+        intializeFromFile(e) {
+            var data = e.target.result;
+            var arr = String.fromCharCode.apply(null, new Uint8Array(data));
+            console.log("XLSX?", XLSX, Object.keys(XLSX))
+            var workbook = XLSX.read(btoa(arr), {
+                type: 'base64'
+            });
 
-            reader.onload = function(e) {
-                var data = e.target.result;
-               var arr = String.fromCharCode.apply(null, new Uint8Array(data));
-                var workbook = XLSX.read(btoa(arr), {
-                    type: 'base64'
-                });
-               
-               
-                obj.sheets = XLSXReader.utils.parseWorkbook(workbook, readCells, toJSON);
-            
-                handler(obj);
-            }
-            
-           
-            reader.readAsArrayBuffer(file);
+            console.log("dingo");
+            console.log("dingo");
+            console.log("dingo");
+            console.log("dingo", e);
+            console.log("dingo", workbook);
+            this.obj.sheets = this.parseWorkbook(workbook, true, true);
+            console.log("obj =>", this.obj);
         },
         parseWorkbook(workbook, readCells, toJSON) {
             if (toJSON === true) {
-                return XLSXReader.utils.to_json(workbook);
+                return this.to_json(workbook);
             }
 
             var sheets = {};
@@ -56,19 +46,21 @@ export default {
             //   console.log("****Sheets*****",sheets)
 
             //   console.log("*****Sheets Object*****",sheets)   
-
+            console.log("WTF workbook", workbook);
             _.forEachRight(workbook.SheetNames, function (sheetName) {
 
 
                 var sheet = workbook.Sheets["Sheet1"];
                 console.log("Sheet !!1", sheet)
-                sheets[sheetName] = XLSXReader.utils.parseSheet(sheet, readCells);
+                sheets[sheetName] = this.parseSheet(sheet, readCells);
             });
 
 
             return sheets;
         },
         parseSheet(sheet, readCells) {
+            console.log("inside of parsesheet, looking at sheet ", sheet)
+
             var range = XLSX.utils.decode_range(sheet['!ref']);
             var sheetData = [];
 
