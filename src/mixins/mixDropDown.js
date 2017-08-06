@@ -6,6 +6,7 @@ export default{
                     return "No matching specification for type";
                 },
                 'Start Koans': function(){
+
                     return this.resultSpecificationQuery(payload);
                 }.bind(this)
             }

@@ -15,6 +15,7 @@ const state = {
     questions: {},
     contractQuestions: [],
     contractAnswers: [],
+    scroll: {},
     hints: {},
     dropdownPayload: {},
     file: null,
@@ -22,6 +23,19 @@ const state = {
 }
 
 const mutations = {
+    SET_SCROLL(state,payload){
+        Object.keys(payload)
+            .forEach(scroll =>{
+                let documentElement = scroll;
+                let scrollStatus = payload[scroll]
+                Vue.set(state.scroll,documentElement,scrollStatus);
+            })
+      console.log("dingo")
+      console.log("dingo")
+      console.log("dingo")
+
+        
+    },
     ADD_FILE(state, payload){
         state.file = payload;
     },
@@ -99,6 +113,7 @@ const mutations = {
 const actions = {
     //changeColumns: ({commit}, state) => commit('changeColumns',state),
     //changeRows: ({commit}, state) => commit('changeRows',state),
+    scrollStatus: ({commit}, state) => commit('SET_SCROLL',state),
     addFile: ({commit}, state) => commit('ADD_FILE',state),
     startLoading: ({commit}, state) => commit('START_LOADING',state),
     stopLoading: ({commit}, state) => commit('STOP_LOADING',state),
@@ -352,6 +367,14 @@ const getters = {
     },
     getLoading: state=>{
         return state.loading;
+    },
+    scrollStatus: (state, getters) => (document) => {
+          console.log("dingo ")
+                    console.log("dingo ")
+
+          console.log("dingo ")
+
+         return state.scroll[document]
     }
 }
 

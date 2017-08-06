@@ -3,7 +3,8 @@
 import VueFormGenerator from "../vue-form-generator";
 import mixQuestions from "./mixQuestions";
 import mixAuth from "../../auth/mixAuth";
-import mixXls from "../../mixins/mixXls.js"
+import mixXls from "../../mixins/mixXls";
+import mixSchemaForms from "../../mixins/mixSchemaForms";
 import clientGrid from "../grids/clientGrid.vue";
 import clientModal from "../layout/clientModal.vue";
 import clientRadio from "../buttons/clientRadio.vue";
@@ -35,222 +36,12 @@ export default {
             ],
             latex: null,
             modalstatus: false,
-            //id	question	answer	selections	explanation	coursetype	modtype	type
-
-            contractQuestionModel: {
-                qcontractName: null,
-                qcontractValue_1: null,
-                qcontractType: null,
-                qcontractModel: null
-            },
-            contractQuestionSchema: {
-                fields: [
-                    {
-                        type: "input",
-                        label: "Question Name",
-                        model: "qcontractName"
-                    },
-                    {
-                        type: "input",
-                        label: "Form Model Name",
-                        model: "qcontractModel"
-                    },
-                    {
-                        type: "select",
-                        label: "form type",
-                        model: "qcontractType",
-                        values: ["select", "text", "text-area"]
-                    },
-                    {
-                        type: "input",
-                        label: "Question Value(s)",
-                        model: "qcontractValue_1"
-                    },
-
-                ]
-            },
-            manageQuestionModel: {
-                id: null,
-                question: null,
-                answer: null,
-                selections: [],
-                explanation: null,
-                coursetype: null,
-                modtype: null,
-                type: null
-            },
-            manageQuestionSchema: {
-                fields: [
-                    {
-                        type: "text-area",
-                        label: "question",
-                        model: "question"
-                    },
-                    {
-                        type: "text-area",
-                        label: "answer",
-                        model: "answer"
-                    },
-                    {
-                        type: "input",
-                        label: "explanation",
-                        model: "explanation"
-                    },
-                    {
-                        type: "select",
-                        label: "coursetype",
-                        model: "coursetype",
-                        values: ["Math", "Science", "Language", "Civics"]
-                    },
-                    {
-                        type: "select",
-                        label: "Selections",
-                        model: "selections"
-                    },
-                    {
-                        type: "select",
-                        label: "modtype",
-                        model: "modtype",
-                        values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
-                    }
-                ]
-            },
-            createAdminModel: {
-                id: 33,
-                username: null,
-                password: null
-            },
-            createAdminSchema: {
-                fields: [
-                    {
-                        type: "input",
-                        label: "Add Content",
-                        model: "ContentHints"
-                    },
-                    {
-                        type: "input",
-                        label: "Admin Videos",
-                        model: "VideoHints"
-                    }
-                ]
-            },
-            questionMaterialModel: {
-                id: null,
-                questionhint: "question hint",
-                videoHint: "video hint",
-                questionId: "6"
-            },
-            questionMaterialSchema: {
-                fields: [
-                    {
-                        type: "text-area",
-                        label: "Add Material",
-                        model: "questionhint"
-
-                    },
-                    {
-                        type: "input",
-                        label: "Add Video",
-                        model: "videoHint"
-
-                    },
-                    {
-                        type: "input",
-                        label: "Question Key",
-                        model: "questionId"
-                    }
-                ]
-            },
-            questionFormModel: {
-                id: 1,
-                question: null,
-                coursetype: null,
-                modtype: null,
-                answer: null,
-                explanation: null,
-                questionValue_1: null,
-
-
-            },
-            questionFormSchema: {
-                fields: [
-                    {
-                        type: "editor",
-                        label: "Create Question,",
-                        model: "question",
-                        height: 200,
-                        content: "<h3>Question Editor</h3>"
-
-                    },
-                    {
-                        type: "select",
-                        label: "coursetype",
-                        model: "coursetype",
-                        values: ["Math", "Science", "Language", "Civics"]
-                    },
-                    {
-                        type: "select",
-                        label: "modtype",
-                        model: "modtype",
-                        values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
-                    },
-                    {
-                        type: "editor",
-                        label: "Answer",
-                        model: "answer",
-                        height: 200,
-                        content: "<h3>Answer</h3>"
-
-                    },
-                    {
-                        type: "text-area",
-                        label: "Explanation",
-                        model: "explanation"
-                    },
-                    {
-                        type: "input",
-                        label: "Selection Value",
-                        model: "questionValue_1"
-                    }
-                ]
-            },
-            selectionFormModel: {
-                id: 2,
-                selection1: null,
-                selection2: null,
-                selection3: null,
-                selection4: null
-            },
-            selectionFormSchema: {
-                fields: [
-                    {
-                        type: "input",
-                        label: "Selection1",
-                        model: "selection1"
-                    },
-                    {
-                        type: "input",
-                        label: "Selection 2",
-                        model: "selection2"
-                    },
-                    {
-                        type: "input",
-                        label: "Selection 3",
-                        model: "selection3"
-                    },
-                    {
-                        type: "input",
-                        label: "Selection 4",
-                        model: "selection4"
-                    }
-                ]
-            },
             tabIndex: null,
             tabs: [],
             tabCounter: 0
-
-
+            //id	question	answer	selections	explanation	coursetype	modtype	type
         }
+           
     },
     components: {
         clientModal,
@@ -261,6 +52,34 @@ export default {
         clientAccordion
     },
     methods: {
+        addAProgramProgram(){
+            console.log("Adding program dingo",this.programModel);
+
+            let submitModel = {
+                name: this.programModel.name,
+                grades : Object.keys(this.programModel)
+                                .reduce((acc,curr)=>{
+                                    if(curr.indexOf('_') !== -1){
+                                        console.log(curr,curr.split('_')[1])
+                                        acc[this.programModel[curr]]= 0; 
+                                    }
+                                    return acc; 
+                                },{}),
+                testerId : this.account.sub
+
+            }
+             this.persistencePost('services/program/add',submitModel)
+                .then(response => {
+                    if(response.ok){
+                        return response.json
+                    } 
+                    console.log("API Call failed")
+                })
+                .then(response => {
+                    console.log("Added Program",response);
+                })
+
+        },
         getEditorValue(data) {
             console.log(" this is the data =>", data);
         },
@@ -406,17 +225,12 @@ export default {
 
             this.questionFormModel.selections = this.questionFormSchema.fields.reduce((acc, curr) => {
 
-
-
                 let value = +curr.model.split('_')[1];
-
 
                 if (!isNaN(value)) {
 
                     acc.push(this.questionFormModel[curr.model]);
-
                 }
-
                 return acc;
             }, [])
 
@@ -525,8 +339,6 @@ export default {
 
             this.contractQuestionModel.qcontractValues = this.contractQuestionSchema.fields.reduce((acc, curr) => {
 
-
-
                 let value = +curr.model.split('_')[1];
 
 
@@ -587,7 +399,7 @@ export default {
                 })
         }
     },
-    mixins: [mixQuestions, mixAuth, mixPersistence, mixXls, mixGrids],
+    mixins: [mixQuestions, mixAuth, mixPersistence, mixXls, mixGrids, mixSchemaForms],
     mounted() {
         this.$nextTick(function () {
             MathJax.Hub.Typeset()
@@ -611,6 +423,8 @@ export default {
                 <div class="panel panel-default">
                     <div class="panel panel-header">
                         <h3>Add Question or Upload Questions</h3>
+                        <vue-form-generator :schema="throwAwaySchema" :model="throwAwayModel"></vue-form-generator>
+                        {{throwAwayModel}}
                         <client-radio :options="radioNewQuestion" @radioSelected="displayQuestionScreen"></client-radio>
                     </div>
                     <div class="panel panel-body">
@@ -690,6 +504,18 @@ export default {
     
                     </div>
                 </div>
+            </b-tab>
+            <b-tab title="Add Programs">
+                 <div class="panel panel-default">
+                    <div class="panel panel-body">
+                        <vue-form-generator :schema="programSchema" :model="programModel" />
+                    </div>
+                    <div class="panel panel-footer">
+                        <button class="btn btn-default" @click="addSelectionValue('program')">Add Course</button>
+                        <button class="btn btn-default" @click="addAProgramProgram">Submit</button>
+    
+                    </div>
+                </div>               
             </b-tab>
             <b-tab title="Sharpening Questions" @click="getQuestions">
                 <div style="overflow-x: scroll">

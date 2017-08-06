@@ -16,21 +16,9 @@ export default {
             if (event) event.preventDefault();
             console.log("clicking on dropdown",selected,this.options);
             var selectObject = _.assign(selected,{id: this.options.id, item: this.focusItem.text});
-            EventBus.$emit('dropdownPayload', selectObject)
+            EventBus.$emit('dropdownPayload', selectObject);
 
-            
-            
-/*
 
-            //Declaring let or const was converting the this context to the window object. 
-            var selectedListItem = this.options.list.filter(function (val) {
-                return val.id === selected.id
-            }.bind(this));
-            selectedListItem = selectedListItem[0];
-            selectedListItem.selectedId = this.isSelected;
-            selectedListItem.listId = this.options.id;
-            EventBus.$emit('dropdownSelected', selectedListItem)
-*/
         }
     },
     name: 'clientDropdown'

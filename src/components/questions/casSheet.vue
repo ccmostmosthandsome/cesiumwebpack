@@ -1,10 +1,17 @@
 <template>
-  <div class="panel-body">
-    <div is="client-question" v-for="(question, index) in questionsMath" 
-          :key="question.id" 
-          :number="index + 1">
+  <div style="margin-left: 0">
+    <client-dashboard>
+      <div class="dashboard-display">
+        <cas-palmadoro></cas-palmadoro>
+        <span>{{civicsGrade}}</span>
+        
+      </div>
   
-      <span slot="symbols">
+    </client-dashboard>
+  
+    <div is="client-question" v-for="(question, index) in questionsMath" :key="question.id" :number="index + 1" @scroll="handleScroll">
+  
+      <span slot="symbols" @scroll="handleScroll">
         <!-- <vue-toggle :value="true" :labels="{checked: 'Foo', unchecked: 'Bar'}" /> -->
         <client-checkbox @checked="showHint(question)" :item="question">
           Show Hint
@@ -12,7 +19,7 @@
         <p v-html="question.question"></p>
       </span>
       <span slot="form">
-        <vue-form-generator :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
+        <vue-form-generator @model-updated="getChanges" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
       </span>
   
       <br/>
@@ -21,31 +28,58 @@
   </div>
 </template>
 <style>
+.dashboard-display {
+  display: inline-block;
 
+}
+
+.dashboard-content {
+  margin: .5em auto;
+}
 </style>
 <script>
 
 import VueFormGenerator from "../vue-form-generator";
 import clientQuestion from "./clientQuestion.vue";
-import clientCheckbox from "../buttons/clientCheckbox.vue"
+import clientCheckbox from "../buttons/clientCheckbox.vue";
+import clientDashboard from "../dashboard/clientDashboard.vue";
+import casPalmadoro from '../timers/casPalmadoro.vue'
 import mixAuth from '../../auth/mixAuth';
 import { EventBus } from '../../eventbus/index';
 import vueToggle from '../buttons/vueToggle.vue';
+import sticky from '../../directives/sticky';
 console.log("Eventbus??? ", EventBus);
 export default {
-  components: { clientQuestion, clientCheckbox, vueToggle },
+  components: { clientQuestion, clientCheckbox, vueToggle, clientDashboard, casPalmadoro },
+  created() {
+    this.$eventToObservable('model-updated')
+      .subscribe((event) => console.log(event.name, event.msg))
+  },
+  computed: {
+    civicsGrade() {
+      if (this.gradeStream) {
+        return this.gradeStream['Civics'].grade;
+      } else {
+        return null;
+      }
+    }
+  },
+  directives: {
+    sticky
+  },
   watch: {
     questions: function (newQuestions) {
       this.questionsMath = [];
       console.log("dingo casSHeet ==========>", this.questions);
       this.questions.forEach(function (question) {
-        console.log("verifying question return data...", question);
         this.questionsMath.push(question);
-        this.model[question.id] = { id: question.id };
-        this.model[question.id][question.question] = null;
+        this.$set(this.model, question.id, { id: question.id });
+        this.$set(this.model[question.id], question.question, null);
         let questionSchema = {
           model: question.id,
           label: question.quesion,
+          answer: question.answer,
+          coursetype: question.coursetype,
           type: "questions",
           values: question.selections
         }
@@ -58,7 +92,6 @@ export default {
         });
       }.bind(this));
 
-      console.log('dingo this.questionsMath', this.questionsMath);
     }
   },
   methods: {
@@ -69,8 +102,20 @@ export default {
         EventBus.$emit('showHint', question);
       } else {
         console.log("dingo removing...");
-        this.$store.dispatch("removeHint",question);
+        this.$store.dispatch("removeHint", question);
       }
+    },
+    getChanges(value, model) {
+      console.log("dingo")
+            console.log("dingo")
+
+      console.log("dingo")
+
+      EventBus.$emit('grade', value, model);
+
+    },
+    handleScroll(e) {
+      console.log("caught scroll in question sheet component");
     }
   },
   mounted() {
@@ -94,7 +139,7 @@ export default {
   },
   mixins: [mixAuth],
   name: 'casSheet',
-  props: ['questions']
+  props: ['questions', 'programStatus', 'gradeStream']
 }
 </script>
 

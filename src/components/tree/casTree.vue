@@ -1,11 +1,11 @@
 <template>
     <div>
         <!-- 
-            			Recursive component used to create tree. 
-            			Context menu displayed via "showMenu" computed value which checks that attribute is defined in the context menu's schema.
-            			iconCollection css class used to display block level elements in-line
-            			:key's are used for elements so that eventual Vue-CSS transitions can be used			
-            		-->
+                			Recursive component used to create tree. 
+                			Context menu displayed via "showMenu" computed value which checks that attribute is defined in the context menu's schema.
+                			iconCollection css class used to display block level elements in-line
+                			:key's are used for elements so that eventual Vue-CSS transitions can be used			
+                		-->
         <li v-bind:key="model.id" style="display:block">
     
             <div :class="{bold: hasChildren}" style="display:inline-block" v-if="!hidingRoot">
@@ -13,26 +13,20 @@
                 <div class="treeCharacters icons">
                     <div class="iconCollection" style="cursor: pointer;">
                         <span v-if="showMenu">
-                            
-                                <span v-if="hasChildren">
-                                    <client-toggle :status="treeExpanded" v-on:flip="treeExpanded = !treeExpanded" />&nbsp;&nbsp;</span>
-                                <span v-else>
-                                    <i class="listItemPointer glyphicon glyphicon-minus"></i> &nbsp;&nbsp; </span>
     
-                                <!-- <span v-bind:class="iconValue" style="cursor: none;"></span  v-for="option in options.list" v-bind:value="option.id"> -->
-                                <span v-html="model.text"></span> 
-                                <!--
-                                <b-dropdown size="sm"  class="m-md-1">
-                                    <b-dropdown-item href="#" v-for="option in menuList.list" v-bind:key="option.id" v-bind:value="option.id">{{option.text}}</b-dropdown-item>
-                                </b-dropdown>
-                                -->
-                                <client-dropdown :options="menuList" :focusItem="model"> </client-dropdown>
-                            
+                            <span v-if="hasChildren">
+                                <client-toggle :status="treeExpanded" v-on:flip="treeExpanded = !treeExpanded" />&nbsp;&nbsp;</span>
+                            <span v-else>
+                                <i class="listItemPointer glyphicon glyphicon-minus"></i> &nbsp;&nbsp; 
+                            </span>
+    
+                            <span v-html="model.text"></span>
+    
+                            <client-dropdown :options="menuList" :focusItem="model"> </client-dropdown>
+    
                         </span>
                         <span v-else>
-                            <client-toggle :status="treeExpanded" v-on:flip="treeExpanded = !treeExpanded" :show="hasChildren" /> &nbsp;&nbsp;
-                            <!-- <span v-bind:class="iconValue" style="cursor: none;"></span> -->
-    
+                            <client-toggle :status="treeExpanded" v-on:flip="treeExpanded = !treeExpanded" :show="hasChildren" /> &nbsp;&nbsp;    
                             <span v-html="model.text"></span>
                         </span>
                     </div>
@@ -142,6 +136,6 @@ export default {
 <style>
 .treeCharacters {
     font-size: x-small;
-    font-weight: 200; 
+    font-weight: 200;
 }
 </style>

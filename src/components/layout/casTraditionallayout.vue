@@ -2,13 +2,13 @@
 @media (min-width: 768px) {
   .affix-content .container {
     width: 700px;
-    height: 100%;
+    
   }
 
   html,
   body {
     background-color: #f8f8f8;
-    height: 100%;
+    
     min-height: 100%;
     overflow: hidden;
   }
@@ -34,6 +34,8 @@
     height: 100%;
     margin-left: 0;
     margin-right: 0;
+    z-index: 200;
+    padding-left: 0;
   }
   .affix-content {
     background-color: white;
@@ -136,23 +138,47 @@ export default {
   data: function () {
     return {
       nav: true,
-      authenticated: false
+      authenticated: false,
+      scrollPrevious: 0,
+      scrollCurrent: 0,
+      scrollDown: false
     }
   },
   name: 'casTraditionallayout',
-  method: {
+  methods: {
     openNav() {
       return this.nav = !this.nav
+    },
+    handleScroll(e,callback){
+      var isScrolling
+      var currentScrollPosition = e.srcElement.scrollTop;
+      if (currentScrollPosition > this.scrollPosition) {
+        console.log("Scrolling down",this.scrollPosition);
+        this.$store.dispatch("scrollStatus", { "content" : {'scrolling': true , 'pageYOffset' : this.scrollPosition}});
+      }
+      this.scrollPosition = currentScrollPosition;
+      window.clearTimeout( isScrolling );
+      isScrolling = setTimeout(function(){
+        stoping.call(this);
+        
+      }.bind(this),66);
+
+      function stoping(){
+        console.log("Stopping Scrolling");
+        this.$store.dispatch("scrollStatus", { "content" : {'scrolling': false , 'pageYOffset' : this.scrollPosition} });
+      }
+
+      
     }
-  },
-  mounted() {
-
-
   },
   props: {
     'asideViews': Array
   }
 }
+
+/* 
+
+*/
 </script>
 <template>
   <div class="row affix-row">
@@ -178,7 +204,7 @@ export default {
           </div>
         </div>
       </div>
-      <div :class="contentCol" style="overflow-y: scroll">
+      <div :class="contentCol" style="overflow-y: scroll;  padding-left: 0px;" @scroll="handleScroll">
         
           <div class="page-header viewPort">
   
