@@ -6,7 +6,9 @@ import mixAuth from "../../auth/mixAuth";
 import mixXls from "../../mixins/mixXls";
 import mixSchemaForms from "../../mixins/mixSchemaForms";
 import clientGrid from "../grids/clientGrid.vue";
-import clientModal from "../layout/clientModal.vue";
+//import clientModal from "../layout/clientModal.vue";
+import clientModal from "../modal/clientModal.vue"
+import s2aAdminModal from "./s2aAdminModal.vue"
 import clientRadio from "../buttons/clientRadio.vue";
 import clientSpinner from "../spinner/clientSpinner.vue";
 import clientFileselect from "../buttons/clientFileselect.vue";
@@ -49,7 +51,8 @@ export default {
         clientRadio,
         clientFileselect,
         clientSpinner,
-        clientAccordion
+        clientAccordion,
+        s2aAdminModal
     },
     methods: {
         addAProgramProgram(){
@@ -289,11 +292,12 @@ export default {
             console.log("dingo")
             console.log("dingo")
             console.log("dingo")
-            this.$refs.dialog.openModal();
+           // this.$refs.dialog.openModal();
+           this.modalstatus = true;
 
         },
         handleModal(event) {
-
+            this.modalstatus = false;
             console.log("dingo")
             console.log("dingo")
             console.log("dingo")
@@ -313,11 +317,11 @@ export default {
             console.log("dingo")
             fetch('/services/questions/update', update)
                 .then((response) => {
-                    if (response.OK) {
+                    if (response.ok) {
                         return response.json()
                     }
                     else {
-                        throw (e)
+                        throw ('error in question update')
                     }
                 })
                 .then((response) => {
@@ -527,12 +531,15 @@ export default {
     
         </b-tabs>
         <span style="padding-top: 30px;">
-            <client-modal modalid="Manage Questions" :open="modalstatus" :modalSchema="manageQuestionSchema" :modalModel="manageQuestionModel" ref="dialog" @modalSubmitted="handleModal">
-                <div slot="footer">
-                    <button class="btn btn-warning" @click="deleteQuestion">Delete</button>
-    
+
+
+            <s2a-admin-modal :open="modalstatus" 
+                @formSubmitted="handleModal"
+                @formCanceled="modalstatus = false">
+                <div slot="form">
+                    <vue-form-generator :model="manageQuestionModel" :schema="manageQuestionSchema"></vue-form-generator>
                 </div>
-            </client-modal>
+            </s2a-admin-modal>
         </span>
     
     </div>

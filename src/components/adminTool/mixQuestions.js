@@ -14,7 +14,12 @@ export default {
 
             fetch(request)
                 .then((response) => {
-                    return response.json()
+                    if(response.ok){
+                        return response.json()
+                    } else {
+                        console.log("Get Questions failed for admin tool",response);
+                    }
+                    
                 })
                 .then(response =>{
                     console.log("dingo");

@@ -58,7 +58,18 @@ const casLearning = resolve => {
 import VueRouter from 'vue-router'
 
 const routes = [
-    {path: '/home', component: casHome},
+    {
+      path: '/home', 
+      component: casHome,
+      beforeEnter: (to, from, next) => {
+        // ...
+          casHome()
+            .then((response)=>{
+              console.log("in route guard...",response);
+              return next();
+            })
+      }
+    },
     {path: '/map', component: casHome},
     {path: '/questions',
         name: 'questionView',

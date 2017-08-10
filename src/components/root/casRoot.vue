@@ -173,9 +173,6 @@ export default {
                 return acc
 
                 function grade(totalcount, totalpercent) {
-                    console.log("dingo dingo dingo")
-                      console.log("dingo dingo dingo")
-                        console.log("dingo dingo dingo")
                     return (totalpercent / (totalcount * 100)) * 100;
                 }
             }, {})
@@ -281,13 +278,15 @@ export default {
     mixins: [mixAuth, mixDropDown, mixPersistence],
     mounted() {
    
-        this.$store.dispatch("fetchContractAnswers", this.account.sub);
-
- 
+    
 
         EventBus.$on('grade', function (value, model) {
+            console.log("dingo")
+                        console.log("dingo")
 
-            if (value !== null) {
+            console.log("dingo");
+
+            if (value.correct || value.exceededTries) {
                 console.log("got value here =>", value);
                 this.grade = value;
             }
@@ -305,8 +304,7 @@ export default {
 
 
         });
-        this.$eventToObservable('grade')
-            .subscribe((event) => console.log("CAUGHT OBSERVABLE EVENT", event.name, event.msg))
+
         EventBus.$on('showHint', (payload) => {
             console.log("dingo dingo", payload, payload.questionId); //services/questions/find/content/questionid
             let request = new Request('/services/questions/find/content/questionid?questionid=' + payload.questionId, {
@@ -350,7 +348,7 @@ export default {
                 </span>
                 <div v-if="!isLoggedIn">
                     <router-link to="/login">
-                        <i class="glyphicon glyphicon-user"></i> Log In Observable
+                        <i class="glyphicon glyphicon-user"></i> Log In or Register
                     </router-link>
     
                 </div>
@@ -392,7 +390,7 @@ export default {
                 </ul>
     
             </div>
-            <div slot="content" @scroll="handleScroll">
+            <div slot="content" >
                 
                 <router-view :questions="questionsByCourse" :programStatus="programStatus" :gradeStream="$gradeObservable" @scroll="handleScroll"></router-view>
             </div>

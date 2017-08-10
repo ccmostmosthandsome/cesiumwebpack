@@ -1,7 +1,39 @@
 export default {
     data: function () {
         return {
+            contractMissionStatementModel: {
+                passion: null,
+                purpose: null,
+                values: null
+            },
+            contractMissionStatementSchema: {
+                fields: [
+                    {
+                        type: "editor",
+                        label: "Life Passions",
+                        model: "passion",
+                        height: 200,
+                        content: "<h3>Examples - Host a Podcast, build applications, etc.</h3>"
 
+                    },
+                    {
+                        type: "editor",
+                        label: "Purpose",
+                        model: "purpose",
+                        height: 200,
+                        content: "<h3>What is your intent in this passion? I.E embrace change with technology, improve my neighborhood.</h3>"
+
+                    },
+                    {
+                        type: "editor",
+                        label: "Life's Values",
+                        model: "values",
+                        height: 200,
+                        content: "<h3>Justice, Liberty, Integrity, Clear communication</h3>"
+
+                    }
+                ]
+            },
             programModel: {
                 name: null,
                 programId: Math.floor(Math.random() * 3307),
@@ -204,9 +236,11 @@ export default {
 
                     },
                     {
-                        type: "text-area",
+                        type: "editor",
                         label: "Explanation",
-                        model: "explanation"
+                        model: "explanation",
+                        height: 200,
+                        content: "<h3>Provide an Explanation</h3>"
                     },
                     {
                         type: "input",

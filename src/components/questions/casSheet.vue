@@ -19,7 +19,7 @@
         <p v-html="question.question"></p>
       </span>
       <span slot="form">
-        <vue-form-generator @model-updated="getChanges" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
+        <vue-form-generator @model-updated="getChanges" @check-event="temp" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
       </span>
   
       <br/>
@@ -95,6 +95,7 @@ export default {
     }
   },
   methods: {
+
     showHint(question) {
       console.log("toggleState", question, EventBus);
       if (question.toggleState === 'accepted') {
@@ -114,9 +115,6 @@ export default {
       EventBus.$emit('grade', value, model);
 
     },
-    handleScroll(e) {
-      console.log("caught scroll in question sheet component");
-    }
   },
   mounted() {
 

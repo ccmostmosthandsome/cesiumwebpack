@@ -49,6 +49,7 @@ const mutations = {
         state.contractQuestions = payload;
     },
     ANSWERS_CONTRACT(state,payload){
+   
         state.contractAnswers = payload;
     },
     UPDATE_HINT(state, payload) {
@@ -200,6 +201,7 @@ const actions = {
                     throw(response);
                 })
                 .then((response)=>{
+                    console.log("Got response for question dingo =>",response);
                     commit('ANSWERS_CONTRACT',response);
                     resolve();
                 })
@@ -338,7 +340,7 @@ const getters = {
         return state.isAdmin;
     },
     isContractRegistered: state =>{
-        return state.contractAnswers.length > 0
+        return state.contractAnswers.length
     },
     getColState: (state, getters) => (storeid) => {
 
