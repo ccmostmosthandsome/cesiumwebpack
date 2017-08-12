@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 import jwtDecode from 'jwt-decode';
 import { getAuthHeader } from '../auth/modAuth';
 Vue.use(Vuex)
 
 const state = {
+    mission: {},
     tableColumns: {},
     tableRows: {},
     isLoggedIn: !!localStorage.getItem("token"),
@@ -21,8 +21,10 @@ const state = {
     file: null,
     loading: false
 }
-
-const mutations = {
+let mutations = {
+    FETCH_MISSION(state, payload){
+        Vue.set(state.mission,'state',payload);
+    },
     SET_SCROLL(state,payload){
         Object.keys(payload)
             .forEach(scroll =>{
@@ -49,7 +51,6 @@ const mutations = {
         state.contractQuestions = payload;
     },
     ANSWERS_CONTRACT(state,payload){
-   
         state.contractAnswers = payload;
     },
     UPDATE_HINT(state, payload) {
@@ -156,6 +157,29 @@ const actions = {
     changeCourse: ({ commit }, state) => commit('CHANGE_COURSE', state),
     updateHint: ({ commit }, state) => commit('UPDATE_HINT', state),
     removeHint: ({ commit }, state) => commit('REMOVE_HINT', state),
+    fetchMissionStatement: ({commit}, state) => {
+        let account = jwtDecode(localStorage.getItem('token'));
+        return new Promise(resolve => {
+            let request = new Request('/services/mission/find/' + account.sub, {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()
+            });
+
+            fetch(request)
+                .then(response => {
+                    if(response.ok){
+                        return response.json()
+                    }
+                    reject(response)
+                })
+                .then(response => commit('FETCH_MISSION',response))
+                .then(response => resolve(response))
+                .catch(response =>{
+                    resolve('error : ',response);
+                })
+        })
+    },
     getByCourse: ({ commit }, course) => {
         return new Promise(resolve => {
             let request = new Request('/services/questions/get/coursetype?coursetype=' + course, {
@@ -183,8 +207,13 @@ const actions = {
 
     },
     fetchContractAnswers: ({ commit }, userid) => {
+        console.log("dingo")
+                console.log("dingo")
+
+        
+        let account = jwtDecode(localStorage.getItem('token'));
         return new Promise(resolve => {
-            let request = new Request('services/contract/answer/list/user?userid=' + userid, {
+            let request = new Request('services/contract/answer/list/user?userid=' + account.sub, {
                 method: 'GET',
                 mode: 'cors',
                 redirect: 'follow',
@@ -203,7 +232,7 @@ const actions = {
                 .then((response)=>{
                     console.log("Got response for question dingo =>",response);
                     commit('ANSWERS_CONTRACT',response);
-                    resolve();
+                    resolve(response);
                 })
                 .catch((exception)=>{
                     console.log("Exception getting questions",exception);
@@ -330,6 +359,9 @@ const actions = {
     }
 }
 const getters = {
+    getMission: state => {
+        return state.mission;
+    },
     dropdownPayload: state => {
         return state.dropdownPayload;
     },
@@ -340,7 +372,14 @@ const getters = {
         return state.isAdmin;
     },
     isContractRegistered: state =>{
-        return state.contractAnswers.length
+        console.log("dingo content store",state.contractAnswers)
+        return state.contractAnswers.length > 0;
+    },
+    getContractAnswers: state =>{
+        return state.contractAnswers;
+    },
+    getContractQuestions: state =>{
+        return state.contractQuestions;
     },
     getColState: (state, getters) => (storeid) => {
 

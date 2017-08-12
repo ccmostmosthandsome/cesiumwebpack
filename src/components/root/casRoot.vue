@@ -58,7 +58,8 @@ import { EventBus } from '../../eventbus/index';
 import { getAuthHeader } from '../../auth/modAuth';
 import VueRouter from 'vue-router'
 import casTraditionallayout from '../layout/casTraditionallayout.vue'
-import clientNavbar from '../layout/clientNavbar.vue'
+import clientNavbar from '../layout/clientNavbar.vue';
+import casKoanTree from '../questions/casKoanTree.vue';
 import mixAuth from '../../auth/mixAuth';
 import mixPersistence from '../../mixins/mixPersistence'
 import clientToggle from '../buttons/clientToggle.vue'
@@ -71,7 +72,7 @@ console.log("compoennts =>", casTraditionallayout, clientNavbar, clientToggle, c
 console.log("mixins =>", mixAuth);
 export default {
     name: 'casRoot',
-    components: { casTraditionallayout, clientNavbar, clientToggle, casTree },
+    components: { casTraditionallayout, clientNavbar, clientToggle, casTree, casKoanTree },
     computed: {
         isLoggedIn() {
             return this.$store.getters.isLoggedIn;
@@ -117,6 +118,7 @@ export default {
     created() {
         this.$store.dispatch("getQuestions", 'GED')
             .then((response) => {
+                console.log("Creating tree!!!!!!!!!!",response);
                 this.loading = false;
                 this.createTree();
             })
@@ -205,7 +207,9 @@ export default {
             if (this.$store.getters.isLoggedIn) {
                 console.log("logging out...");
                 // this.userAccount = ??{};
+                this.$gradeObservable= [];
                 this.$store.dispatch('logout');
+
                 this.$router.push('/');
                 // this.labels = {"unchecked" : 'Login', "checked" : 'Logout'}          
             } else {
@@ -372,7 +376,7 @@ export default {
                     </li>
                     <li>
                         <router-link :to="{name: 'questionView', params: {model : tree, menuSchema : schema.menuSchema, showRoot: false}}">
-                            <span class="glyphicon glyphicon-list-alt"></span> Questions
+                            <span class="glyphicon glyphicon-list-alt"></span> ~Koans~
     
                             <router-view name="treeMenu">
     
@@ -386,7 +390,7 @@ export default {
                         </router-link>
     
                     </li>
-    
+
                 </ul>
     
             </div>

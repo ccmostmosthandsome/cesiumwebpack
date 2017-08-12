@@ -13,6 +13,11 @@ const nrlMap = resolve => {
 }
 */
 
+const casRoot = resolve =>{
+  require.ensure(['../components/root/casRoot.vue'],() =>{
+    resolve(require('../components/root/casRoot.vue'));
+  });
+}
 
 
 const casSheet = resolve =>{
@@ -40,9 +45,9 @@ const casRegister = resolve =>{
   });
 }
 
-const casTree = resolve =>{
-  require.ensure(['../components/tree/casTree.vue'],()=>{
-    resolve(require('../components/tree/casTree.vue'));
+const casKoanTree = resolve =>{
+  require.ensure(['../components/questions/casKoanTree.vue'],()=>{
+    resolve(require('../components/questions/casKoanTree.vue'));
   });
 }
 
@@ -61,33 +66,27 @@ const routes = [
     {
       path: '/home', 
       component: casHome,
-      beforeEnter: (to, from, next) => {
-        // ...
-          casHome()
-            .then((response)=>{
-              console.log("in route guard...",response);
-              return next();
-            })
-      }
     },
     {path: '/map', component: casHome},
     {path: '/questions',
         name: 'questionView',
         components: {
         default: casSheet,
-        treeMenu: casTree,
+        treeMenu: casKoanTree,
         aside: casLearning
       },
-        props: {
+      props: {
           default : true,
           treeMenu: true,
           aside: true
           
-        }
+      }
+      
     },
     {path: '/admin', component: casAdmin},
     {path: '/login', component: casLogin},
-    {path: '/register', component: casRegister}
+    {path: '/register', component: casRegister},
+    {path: '/koans', component: casKoanTree}
 ]
 
 const router = new VueRouter({

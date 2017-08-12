@@ -2,16 +2,17 @@ export default {
     data: function () {
         return {
             contractMissionStatementModel: {
-                passion: null,
+                motivations: null,
                 purpose: null,
-                values: null
+                values: null,
+                userId: this.account.sub
             },
             contractMissionStatementSchema: {
                 fields: [
                     {
                         type: "editor",
-                        label: "Life Passions",
-                        model: "passion",
+                        label: "Motivations",
+                        model: "motivations",
                         height: 200,
                         content: "<h3>Examples - Host a Podcast, build applications, etc.</h3>"
 
@@ -199,7 +200,7 @@ export default {
                 question: null,
                 coursetype: null,
                 modtype: null,
-                answer: null,
+                answerId: null,
                 explanation: null,
                 questionValue_1: null,
 
@@ -228,11 +229,9 @@ export default {
                         values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
                     },
                     {
-                        type: "editor",
-                        label: "Answer",
-                        model: "answer",
-                        height: 200,
-                        content: "<h3>Answer</h3>"
+                        type: "input",
+                        label: "Correct Question #",
+                        model: "answerId",
 
                     },
                     {
@@ -244,7 +243,7 @@ export default {
                     },
                     {
                         type: "input",
-                        label: "Selection Value",
+                        label: "Question 1",
                         model: "questionValue_1"
                     }
                 ]

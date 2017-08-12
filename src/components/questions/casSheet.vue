@@ -3,15 +3,19 @@
     <client-dashboard>
       <div class="dashboard-display">
         <cas-palmadoro></cas-palmadoro>
-        <span>{{civicsGrade}}</span>
+       
+        <div v-for="(program, key) in dashboardGrades" v-bind:key="key" style="display: inline-block;">
+          <strong>{{key}} {{program.grade}}</strong>
+        </div>
         
+      
       </div>
   
     </client-dashboard>
   
-    <div is="client-question" v-for="(question, index) in questionsMath" :key="question.id" :number="index + 1" @scroll="handleScroll">
+    <div style="padding-left: 1em;" v-for="(question, index) in questionsMath" :key="question.id" :number="index + 1" >
   
-      <span slot="symbols" @scroll="handleScroll">
+      <span slot="symbols" >
         <!-- <vue-toggle :value="true" :labels="{checked: 'Foo', unchecked: 'Bar'}" /> -->
         <client-checkbox @checked="showHint(question)" :item="question">
           Show Hint
@@ -19,7 +23,7 @@
         <p v-html="question.question"></p>
       </span>
       <span slot="form">
-        <vue-form-generator @model-updated="getChanges" @check-event="temp" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
+        <vue-form-generator @model-updated="getChanges" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
       </span>
   
       <br/>
@@ -56,18 +60,20 @@ export default {
       .subscribe((event) => console.log(event.name, event.msg))
   },
   computed: {
-    civicsGrade() {
-      if (this.gradeStream) {
-        return this.gradeStream['Civics'].grade;
-      } else {
-        return null;
+    dashboardGrades() {
+      
+      for(var i in this.gradeStream ){
+        this.$set(this.dashboard,i,this.gradeStream[i]);
       }
+      
+      return this.dashboard;
     }
   },
   directives: {
     sticky
   },
   watch: {
+
     questions: function (newQuestions) {
       this.questionsMath = [];
       console.log("dingo casSHeet ==========>", this.questions);
@@ -78,10 +84,10 @@ export default {
         let questionSchema = {
           model: question.id,
           label: question.quesion,
-          answer: question.answer,
+          answerId: question.answerId,
           coursetype: question.coursetype,
           type: "questions",
-          values: question.selections
+          values: question.values
         }
         this.schema[question.id] = {
           fields: []
@@ -114,7 +120,7 @@ export default {
 
       EventBus.$emit('grade', value, model);
 
-    },
+    }
   },
   mounted() {
 
@@ -125,6 +131,7 @@ export default {
   },
   data: function () {
     return {
+      dashboard: {},
       questionsMath: [],
       field: null,
       model: {},

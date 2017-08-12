@@ -151,7 +151,7 @@ export default {
     },
     handleScroll(e,callback){
       var isScrolling
-      var currentScrollPosition = e.srcElement.scrollTop;
+      var currentScrollPosition = e.target.scrollTop;
       if (currentScrollPosition > this.scrollPosition) {
         console.log("Scrolling down",this.scrollPosition);
         this.$store.dispatch("scrollStatus", { "content" : {'scrolling': true , 'pageYOffset' : this.scrollPosition}});

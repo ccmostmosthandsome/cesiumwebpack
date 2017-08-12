@@ -126,7 +126,8 @@ export default {
                         {
                             "type": 'input',
                             "model": 'selectvalue_' + questionIndex,
-                            "label": 'Value'
+                            "label": 'Question ' +  questionIndex
+
                         }
                     )
 
@@ -225,17 +226,27 @@ export default {
         },
         createQuestion() {
 
-
-            this.questionFormModel.selections = this.questionFormSchema.fields.reduce((acc, curr) => {
-
+            
+            this.questionFormModel.values = this.questionFormSchema.fields.reduce(function(acc, curr){
+                
+                //Check if an additional value
                 let value = +curr.model.split('_')[1];
-
+                //Grab the value's 
+                
                 if (!isNaN(value)) {
+                    let questionIndexNumber = parseInt(curr.label.split(' ')[1]);
+                    let questionId = Math.floor(Math.random() * 9999);
+                    acc.push({
+                        name: this["questionFormModel"][curr.model],
+                        valueId: questionId
+                    });
+                    //If the question index matches the user's correct answer# than replace the answerId with the question-value's questionId. 
+                    questionIndexNumber === parseInt(this.questionFormModel.answerId) ? this.questionFormModel.answerId = questionId : '';
 
-                    acc.push(this.questionFormModel[curr.model]);
+                    console.log("WTF??",this.questionFormModel);
                 }
                 return acc;
-            }, [])
+            }.bind(this), [])
 
             //Remove id field to leave only selections in array.
             this.questionFormModel.id = Math.floor(Math.random() * 30000);

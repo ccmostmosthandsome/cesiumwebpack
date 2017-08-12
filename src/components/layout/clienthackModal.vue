@@ -48,12 +48,12 @@
                         </header>
 
                         <div class="modal-body" ref="body" :id="id ? (id + '__BV_body_') : null">
-                            <slot></slot>
+                            <slot name="content"></slot>
                         </div>
 
                         <footer class="modal-footer" ref="footer" v-if="!hideFooter">
-                            <slot name="modal-footer">
-                                <!--
+                            <slot name="moda-footer">
+                                
                                 <b-btn v-if="!okOnly"
                                        variant="secondary"
                                        :size="buttonSize"
@@ -65,7 +65,7 @@
                                        :disabled="okDisabled"
                                        @click="hide(true)"
                                 ><slot name="modal-ok">{{ okTitle }}</slot></b-btn>
-                                -->
+                                
                             </slot>
                         </footer>
 
@@ -133,6 +133,7 @@
             return {
                 is_visible: false,
                 return_focus: this.returnFocus || null
+
             };
         },
         model: {
@@ -381,6 +382,8 @@
             if (this.visible === true) {
                 this.show();
             }
+
+            //this.hideFooter = true;
         },
         destroyed() {
             // Make sure event listener is rmoved

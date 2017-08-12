@@ -1,55 +1,56 @@
 <style>
-    .casHome {
-        padding-bottom: 50px;
-    }
-    .missionStatement{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+.casHome {
+    padding-bottom: 50px;
+}
 
-    .missionStatement__header{
-        font-family: 'Josefin Sans', sans-serif;
-        font-weight: 500;
-        font-size: 45px;
-        text-transform: uppercase;
-    }
-
-    .missionStatement__description {
-        margin-top: 20px;
-        line-height: 25px;
-        color: #8e8e8e;
-        margin-bottom: 50px;
-    }
 </style>
 <script>
 import casContract from './casContract.vue';
-import mixSchemaForms from '../../mixins/mixSchemaForms'
+import casDisplay from './casDisplay.vue';
+import casMission from './casMission.vue';
+import mapImage from '../../images/metroMap.jpg';
+import mixAuth from '../../auth/mixAuth';
+import store from '../../store/index.js';
 export default {
-    components: { casContract },
+    beforeRouteEnter: function (to, from, next) {
+        store.dispatch('fetchContractAnswers')
+            .then(response => store.dispatch('fetchContractQuestions'))
+            .then(response => store.dispatch('fetchMissionStatement'))
+            .then(response => next());
+    },
+    components: { casContract, casDisplay, casMission },
     name: 'nrlHome',
     computed: {
-        contentScrollStatus() {
-            return this.$store.getters.scrollStatus('content')
+        hasAnsweredQuestions: {
+            get: function() {
+                this.isAnswered = this.$store.getters.isContractRegistered;
+                return this.isAnswered;
+            },
+            set: function(isAnswered) {
+                console.log("setting is asnwered",this,isAnswered);
+                this.isAnswered = isAnswered
+            }
+
         }
     },
     data: function () {
         return {
-            showContract: false
+            showContract: false,
+            isAnswered: false
         }
     },
-    mixins: [mixSchemaForms],
+    methods: {
+        answer(val){
+            console.log("Picked up event");
+            store.dispatch('fetchContractAnswers')
+                .then(response=> this.hasAnsweredQuestions = this.$store.getters.isContractRegistered);
+        }
+    },
+    mixins: [mixAuth],
     watch: {
         contentScrollStatus: function (newvalue) {
             console.log("Cas Hpme page Y Offset", newvalue.pageYOffset);
             newvalue.pageYOffset >= 420 ? this.showContract = true : ''
-            /*
-            if (newvalue.pageYOffset >= 100) {
-                this.fixedPosition = true;
-                this.panelStyle = ['stick', 'dashPanel'];
-            } else {
-                this.fixedPosition = false;
-            }*/
 
         }
     }
@@ -57,24 +58,8 @@ export default {
 </script>
 <template>
     <div class="casHome">
-        <div class="jumbotron">
-            <h1 class="display-3">Castello</h1>
-            <p class="lead"> Mapping Your Life, Building your Defenses</p>
-        </div>
-    
-        <cas-contract></cas-contract>
-        <div  v-if="showContract" > 
-            <div class="missionStatement" >
-                <h3 class="missionStatement__header">Mission Statement</h3>
-            </div> 
-            <div class="missionStatement">
-                <p class="mionStatement__description">7 Habits of Effective People Life Mission</p>
-            </div>
-            <div class="missionStatement" style="background: rgba(255, 255, 255, 0.5);" >
-                <vue-form-generator :schema="contractMissionStatementSchema" :model="contractMissionStatementModel"></vue-form-generator>
-            </div>
-            
-        </div>
-        
+        <cas-display></cas-display>
+        <cas-contract @questionAnswered="answer" :hasAnsweredQuestions="hasAnsweredQuestions"></cas-contract>
+        <cas-mission :hasAnsweredQuestions="hasAnsweredQuestions"></cas-mission>
     </div>
 </template>

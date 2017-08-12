@@ -1,10 +1,9 @@
 <template>
     <div class="contractQuestions">
-       
-        <span v-if="hasAnsweredQuestions > 1">
+        <span v-if="hasAnsweredQuestions">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-10 col-md-offset-1" >
+                    <div class="col-md-10 col-md-offset-1">
                         <div class="well">
     
                             <ul class="wellUl">
@@ -34,7 +33,6 @@
     
         </span>
     
-        
     </div>
 </template>
 
@@ -45,19 +43,20 @@ import mixPersistence from '../../mixins/mixPersistence';
 export default {
     name: 'casContract',
     computed: {
-        hasAnsweredQuestions: {
-            //cache: false,
-            get() {
-                return this.$store.getters.isContractRegistered;
-            }
-
+        contractQuestions(){
+            return this.$store.getters.getContractQuestions;
+        },
+        contractAnswers(){
+            return this.$store.getters.getContractAnswers;
         },
         answeredQuestions() {
-            let answers = this.$store.state.contractAnswers.map((answer) => {
-                let question = this.$store.state.contractQuestions.filter(question => question.qcontractId === answer.qaQuestionId)[0];
+            let answers = this.contractAnswers.map((answer) => {
+                console.log("questionName dingo",answer.qaQuestionId,this.contractQuestions);
+                let question = this.contractQuestions.filter(question => question.qcontractId === answer.qaQuestionId)[0];
+                 console.log("questionName filtered",question);
                 this.$set(answer, 'questionName', question.qcontractName);
                 return answer;
-            })
+            });
             console.log("dingo")
             console.log("dingo")
 
@@ -98,28 +97,51 @@ export default {
         }
 
     },
-    created(){
-    },
-    data: function () {
-        return {
-            contractQuestions: []
-        }
+    created() {
     },
     methods: {
+        init() {
+
+            fetch(request)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (response) {
+                    console.log("got dingo response... => ", response);
+                    response.forEach(function (contractQuestion) {
+                        this.contractQuestionModel[contractQuestion.qcontractModel] = null;
+                        console.log("Checking null", contractQuestion);
+                        if (contractQuestion.qcontractType !== null) {
+                            this.contractQuestionSchema.fields.push({
+                                type: contractQuestion.qcontractType,
+                                label: contractQuestion.qcontractName,
+                                model: contractQuestion.qcontractModel,
+                                values: contractQuestion.qcontractValues.filter(value => value)
+                            });
+                        } else {
+                            console.log("fucking null")
+                        }
+
+
+
+
+                    }.bind(this));
+                }.bind(this))
+        },
+
         processContractQuestions() {
             console.log("running questions");
-            let questions = Object.keys(this.contractQuestionModel).map(function (question) {
-
-                let values = this.contractQuestionSchema.fields.filter(function (field) {
-
-                    return field.model === question
-                });
+            console.log("dingo processed questions => ", this.contractQuestions[0]);
+            let questions = Object.keys(this.contractQuestionModel)
+                .filter(e => e !== 'null')
+                .map(function (question) {
+                console.log("dingo processed model => ", question);
+                let values = this.contractQuestionSchema.fields.filter(field => field.model === question);
 
                 values = values[0] ? values[0].values : null
+                
                 let qaQuestionId = this.contractQuestions.filter(cQuestion => cQuestion.qcontractModel == question)[0].qcontractId;
-
-
-
+                
                 console.log("values!!!!!!!", values);
                 return {
                     qcontractName: question,
@@ -129,22 +151,28 @@ export default {
                     qcontractId: Math.floor(Math.random() * 3307)
                 }
             }.bind(this))
+            console.log("dingo processed questions => ", questions);
+            
             console.log("running promises");
-            Promise.all(questions.map((question => {
+            Promise.all(questions.map(question => {
                 console.log("###########Question#########", question);
                 this.persistencePost('services/contract/answer/give', question)
-            })))
+            }))
                 .then((response) => {
                     console.log("all promises complete!!", response);
+                    console.log("all promises complete!!", response);
+                    console.log("all promises complete!!", response);
+                    this.$emit('questionAnswered',true);
+
                 });
 
-
+                
 
         }
     },
     mixins: [mixAuth, mixPersistence],
     mounted() {
-        this.$store.dispatch("fetchContractAnswers", this.account.sub);
+        
 
         let request = new Request('services/contract', {
             method: 'GET',
@@ -167,7 +195,7 @@ export default {
                 console.log("got dingo response... => ", response);
                 response.forEach(function (contractQuestion) {
                     this.contractQuestionModel[contractQuestion.qcontractModel] = null;
-                    console.log("Checking null",contractQuestion);
+                    console.log("Checking null", contractQuestion);
                     if (contractQuestion.qcontractType !== null) {
                         this.contractQuestionSchema.fields.push({
                             type: contractQuestion.qcontractType,
@@ -184,7 +212,8 @@ export default {
 
                 }.bind(this));
             }.bind(this))
-    }
+    },
+    props: ['hasAnsweredQuestions']
 
 
 }
@@ -193,6 +222,7 @@ export default {
 <style>
 .contractQuestions {
     padding-bottom: 100px;
+    padding-left: 30px;
 }
 
 

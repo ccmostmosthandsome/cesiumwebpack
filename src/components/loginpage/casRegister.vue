@@ -19,7 +19,8 @@
                         {
                             "model" : 'password',
                             "label" : 'Password',
-                            "type"  : 'input'
+                            "type"  : 'input',
+                            "inputType": "password",
                         }
                     ]
                 }
@@ -42,7 +43,7 @@
     }
 </script>
 <template>
-    <div>
+    <div class="login">
         <div class="panel panel-default">
             <div class="panel-body">
                 <vue-form-generator :schema="loginSchema"  :model="loginModel"/>
@@ -54,4 +55,7 @@
     </div>
 </template>
 <style>
+    .login{
+        padding-left: 33px;
+    }
 </style>

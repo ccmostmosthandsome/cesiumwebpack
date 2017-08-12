@@ -18,7 +18,7 @@ export default {
 
                 return fetch(request)
                     .then((response) => {
-                        if (response.OK) {
+                        if (response.ok) {
                             return response.json()
                         }
                         return resolve('posersistence failed', response);
@@ -48,10 +48,10 @@ export default {
                         if (response.ok) {
                             return response.json()
                         }
-                        return resolve('posersistence failed', response);
+                        return resolve('persistence failed', response);
                     })
                     .then((response) => {
-                       return  resolve(response);
+                       resolve(response);
                     })
                     .catch((response)=>{
                         console.log("Major failure here=>",response);
