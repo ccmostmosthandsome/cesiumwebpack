@@ -1,7 +1,7 @@
 <template>
-    <div style="display: inline-block;">
-        <div>{{ timer }}</div> 
-    </div>
+    <span>
+        Palmadoro Timer {{ timer }}
+    </span>
 </template>
 
 <script>

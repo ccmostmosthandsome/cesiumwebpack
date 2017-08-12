@@ -45,7 +45,7 @@
     }
 </script>
 <template>
-    <div>
+    <div class="login">
         <div class="panel panel-default">
             <div class="panel-body">
                 <vue-form-generator :schema="loginSchema"  :model="loginModel"/>
@@ -61,4 +61,7 @@
     </div>
 </template>
 <style>
+    .login{
+        padding: 1em;
+    }
 </style>

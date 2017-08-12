@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 import jwtDecode from 'jwt-decode';
 import { getAuthHeader } from '../auth/modAuth';
 Vue.use(Vuex)
 
 const state = {
+    mission: {},
     tableColumns: {},
     tableRows: {},
     isLoggedIn: !!localStorage.getItem("token"),
@@ -15,11 +15,38 @@ const state = {
     questions: {},
     contractQuestions: [],
     contractAnswers: [],
+    scroll: {},
     hints: {},
-    dropdownPayload: {}
+    dropdownPayload: {},
+    file: null,
+    loading: false
 }
+let mutations = {
+    FETCH_MISSION(state, payload){
+        Vue.set(state.mission,'state',payload);
+    },
+    SET_SCROLL(state,payload){
+        Object.keys(payload)
+            .forEach(scroll =>{
+                let documentElement = scroll;
+                let scrollStatus = payload[scroll]
+                Vue.set(state.scroll,documentElement,scrollStatus);
+            })
+      console.log("dingo")
+      console.log("dingo")
+      console.log("dingo")
 
-const mutations = {
+        
+    },
+    ADD_FILE(state, payload){
+        state.file = payload;
+    },
+    START_LOADING(state){
+        state.loading = true;
+    },
+    STOP_LOADING(state){
+        state.loading = false;
+    },
     QUESTIONS_CONTRACT(state, payload) {
         state.contractQuestions = payload;
     },
@@ -88,6 +115,10 @@ const mutations = {
 const actions = {
     //changeColumns: ({commit}, state) => commit('changeColumns',state),
     //changeRows: ({commit}, state) => commit('changeRows',state),
+    scrollStatus: ({commit}, state) => commit('SET_SCROLL',state),
+    addFile: ({commit}, state) => commit('ADD_FILE',state),
+    startLoading: ({commit}, state) => commit('START_LOADING',state),
+    stopLoading: ({commit}, state) => commit('STOP_LOADING',state),
     sendDropdownPayload: ({ commit }, state) => commit('ADD_DROPDOWN_PAYLOAD', state),
     changeToken: ({ commit }, state) => commit('changeToken', state),
     changeRows: ({ commit }, state) => commit('changeRows', state),
@@ -126,6 +157,29 @@ const actions = {
     changeCourse: ({ commit }, state) => commit('CHANGE_COURSE', state),
     updateHint: ({ commit }, state) => commit('UPDATE_HINT', state),
     removeHint: ({ commit }, state) => commit('REMOVE_HINT', state),
+    fetchMissionStatement: ({commit}, state) => {
+        let account = jwtDecode(localStorage.getItem('token'));
+        return new Promise(resolve => {
+            let request = new Request('/services/mission/find/' + account.sub, {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()
+            });
+
+            fetch(request)
+                .then(response => {
+                    if(response.ok){
+                        return response.json()
+                    }
+                    reject(response)
+                })
+                .then(response => commit('FETCH_MISSION',response))
+                .then(response => resolve(response))
+                .catch(response =>{
+                    resolve('error : ',response);
+                })
+        })
+    },
     getByCourse: ({ commit }, course) => {
         return new Promise(resolve => {
             let request = new Request('/services/questions/get/coursetype?coursetype=' + course, {
@@ -153,8 +207,13 @@ const actions = {
 
     },
     fetchContractAnswers: ({ commit }, userid) => {
+        console.log("dingo")
+                console.log("dingo")
+
+        
+        let account = jwtDecode(localStorage.getItem('token'));
         return new Promise(resolve => {
-            let request = new Request('services/contract/answer/list/user?userid=' + userid, {
+            let request = new Request('services/contract/answer/list/user?userid=' + account.sub, {
                 method: 'GET',
                 mode: 'cors',
                 redirect: 'follow',
@@ -171,8 +230,9 @@ const actions = {
                     throw(response);
                 })
                 .then((response)=>{
+                    console.log("Got response for question dingo =>",response);
                     commit('ANSWERS_CONTRACT',response);
-                    resolve();
+                    resolve(response);
                 })
                 .catch((exception)=>{
                     console.log("Exception getting questions",exception);
@@ -298,18 +358,10 @@ const actions = {
         })
     }
 }
-/**
- * 
- * .filter(function(){
-            val name = col.name.trim();
-            console.log("dingo")
-             console.log("dingo")
-              console.log("dingo")
-               console.log("dingo")
-               return name !== 'sum' || name !== 'storeid';
-        });
- */
 const getters = {
+    getMission: state => {
+        return state.mission;
+    },
     dropdownPayload: state => {
         return state.dropdownPayload;
     },
@@ -320,14 +372,17 @@ const getters = {
         return state.isAdmin;
     },
     isContractRegistered: state =>{
-        return state.contractAnswers.length > 0
+        console.log("dingo content store",state.contractAnswers)
+        return state.contractAnswers.length > 0;
+    },
+    getContractAnswers: state =>{
+        return state.contractAnswers;
+    },
+    getContractQuestions: state =>{
+        return state.contractQuestions;
     },
     getColState: (state, getters) => (storeid) => {
 
-        console.log("dingo")
-        console.log("dingo")
-        console.log("dingo")
-        console.log("dingo")
 
         return state.tableColumns[storeid]
     },
@@ -347,6 +402,20 @@ const getters = {
     getCourseHints: (state, getters) => (coursetype) => {
 
         return state.hints[coursetype];
+    },
+    getFile: state=>{
+        return state.file;
+    },
+    getLoading: state=>{
+        return state.loading;
+    },
+    scrollStatus: (state, getters) => (document) => {
+          console.log("dingo ")
+                    console.log("dingo ")
+
+          console.log("dingo ")
+
+         return state.scroll[document]
     }
 }
 

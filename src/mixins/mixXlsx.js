@@ -9,23 +9,30 @@ export default {
         }
     },
     methods: {
-        etlExcel(e){
-                    var data = e.target.result;
-                    var arr = String.fromCharCode.apply(null, new Uint8Array(data));
-                    
-                    var workbook = XLSX.read(btoa(arr), {
-                        type: 'base64'
-                    });
+        encodeWorkbook(bits) {
+            var data = bits;
+            var arr = String.fromCharCode.apply(null, new Uint8Array(data));
+            return XLSX.read(btoa(arr), {
+                type: 'base64'
+            });
 
-                    console.log("dingo");
-                    console.log("dingo");
-                    console.log("dingo");
-                    console.log("dingo");
-                    console.log("dingo", this);
-                    this.sheet.sheets = this.parseWorkbook(workbook, true, true);
-                    console.log("obj =>",  this.sheet);
-                    this.$emit('input',this.sheet);
-                    //handler(obj);
+
+        },
+        intializeFromFile(e) {
+            var data = e.target.result;
+            var arr = String.fromCharCode.apply(null, new Uint8Array(data));
+            console.log("XLSX?", XLSX, Object.keys(XLSX))
+            var workbook = XLSX.read(btoa(arr), {
+                type: 'base64'
+            });
+
+            console.log("dingo");
+            console.log("dingo");
+            console.log("dingo");
+            console.log("dingo", e);
+            console.log("dingo", workbook);
+            this.obj.sheets = this.parseWorkbook(workbook, true, true);
+            console.log("obj =>", this.obj);
         },
         parseWorkbook(workbook, readCells, toJSON) {
             if (toJSON === true) {
@@ -40,7 +47,7 @@ export default {
             //   console.log("****Sheets*****",sheets)
 
             //   console.log("*****Sheets Object*****",sheets)   
-
+            console.log("WTF workbook", workbook);
             _.forEachRight(workbook.SheetNames, function (sheetName) {
 
 
@@ -53,7 +60,8 @@ export default {
             return sheets;
         },
         parseSheet(sheet, readCells) {
-            console.log("inside of parsesheet, looking at sheet ",sheet)
+
+            console.log("inside of parsesheet, looking at sheet ", sheet)
 
             var range = XLSX.utils.decode_range(sheet['!ref']);
             var sheetData = [];
