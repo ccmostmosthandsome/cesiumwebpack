@@ -1,12 +1,23 @@
 <template>
-    <cas-tree :model="tree" :menuSchema="schema.menuSchema" />
+ 
+       
+        <cas-tree :model="tree" :menuSchema="schema.menuSchema" />
+
+    
 </template>
 
 <script>
 import casTree from "../tree/casTree.vue";
 import menuSchema from '../tree/courseQuestionDropdown';
+import store from '../../store/index.js';
+
 export default {
     'name': 'casKoanTree',
+    beforeRouteEnter: function(to, from, next){
+        //Get Program
+        //Q All promise through it to get questins which match koans
+        store.getters.program
+    },
     components: { casTree },
     computed: {
         questions: {
@@ -31,6 +42,11 @@ export default {
             set(grades) {
                 this.grading = grades;
             }
+        },
+        koans(){
+            console.log("dingo getting koans..")
+            let program = this.$store.getters.program
+            return program.koans.map(koan => koan.koan)
         }
     },
     created() {
@@ -48,7 +64,11 @@ export default {
         }
     },
     methods: {
+        getKoan(){
+            
+        },
         getCourses() {
+            
 
             var questionObject = this.questions.reduce(function (acc, curr) {
                 var context = this;
@@ -95,7 +115,7 @@ export default {
             context.parent = 'Root';
 
             this.$set(this.tree, 'id', 'Root')
-            this.$set(this.tree, 'attr', { type: 'course' })
+            this.$set(this.tree, 'attr', { 'type': 'course' })
             this.$set(this.tree, 'parent', 'false')
             this.$set(this.tree, 'children', this.getCourses());
             console.log("dingo");
@@ -106,6 +126,9 @@ export default {
 
 
         },
+    },
+    mounted(){
+        console.log("Dingo koan tree activated!!!");
     }
 }
 </script>

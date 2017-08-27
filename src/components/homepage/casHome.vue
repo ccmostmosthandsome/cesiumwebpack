@@ -6,8 +6,10 @@
 </style>
 <script>
 import casContract from './casContract.vue';
+import casKoanTree from '../questions/casKoanTree.vue'
 import casDisplay from './casDisplay.vue';
 import casMission from './casMission.vue';
+import casProgram from './casProgram.vue';
 import mapImage from '../../images/metroMap.jpg';
 import mixAuth from '../../auth/mixAuth';
 import store from '../../store/index.js';
@@ -15,10 +17,12 @@ export default {
     beforeRouteEnter: function (to, from, next) {
         store.dispatch('fetchContractAnswers')
             .then(response => store.dispatch('fetchContractQuestions'))
+            .then(response => store.dispatch('questionsMerge'))
             .then(response => store.dispatch('fetchMissionStatement'))
+            .then(response => store.dispatch('fetchUserProgram'))
             .then(response => next());
     },
-    components: { casContract, casDisplay, casMission },
+    components: { casContract, casDisplay, casMission, casProgram, casKoanTree },
     name: 'nrlHome',
     computed: {
         hasAnsweredQuestions: {
@@ -58,8 +62,10 @@ export default {
 </script>
 <template>
     <div class="casHome">
+        <p>dingo koan tree: <cas-koan-tree/></p>
         <cas-display></cas-display>
         <cas-contract @questionAnswered="answer" :hasAnsweredQuestions="hasAnsweredQuestions"></cas-contract>
         <cas-mission :hasAnsweredQuestions="hasAnsweredQuestions"></cas-mission>
+        <cas-program></cas-program>
     </div>
 </template>

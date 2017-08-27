@@ -63,7 +63,8 @@ const casLearning = resolve => {
 import VueRouter from 'vue-router'
 
 const routes = [
-    {
+  {path: '/koans', component: casKoanTree},
+  {
       path: '/home', 
       component: casHome,
     },
@@ -85,8 +86,7 @@ const routes = [
     },
     {path: '/admin', component: casAdmin},
     {path: '/login', component: casLogin},
-    {path: '/register', component: casRegister},
-    {path: '/koans', component: casKoanTree}
+    {path: '/register', component: casRegister}
 ]
 
 const router = new VueRouter({

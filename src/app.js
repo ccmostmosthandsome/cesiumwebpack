@@ -24,6 +24,7 @@ Vue.use(VueRx, {
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './utilities/imagehover.min.css'
 
 const app = new Vue({
     router,

@@ -207,7 +207,7 @@ export default {
             if (this.$store.getters.isLoggedIn) {
                 console.log("logging out...");
                 // this.userAccount = ??{};
-                this.$gradeObservable= [];
+                //this.$gradeObservable= [];
                 this.$store.dispatch('logout');
 
                 this.$router.push('/');
@@ -383,6 +383,7 @@ export default {
                             </router-view>
                         </router-link>
                     </li>
+
                     <li v-if="isAdmin">
     
                         <router-link to="/admin">
@@ -396,7 +397,7 @@ export default {
             </div>
             <div slot="content" >
                 
-                <router-view :questions="questionsByCourse" :programStatus="programStatus" :gradeStream="$gradeObservable" @scroll="handleScroll"></router-view>
+                <router-view :questions="questionsByCourse" :programStatus="programStatus" :gradeStream="$gradeObservable" ></router-view>
             </div>
             <div slot="aside" style="margin-left: 0;">
     

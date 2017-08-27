@@ -5,6 +5,7 @@ import { getAuthHeader } from '../auth/modAuth';
 Vue.use(Vuex)
 
 const state = {
+    program: {},
     mission: {},
     tableColumns: {},
     tableRows: {},
@@ -13,6 +14,7 @@ const state = {
     accountRoles: [],
     course: {},
     questions: {},
+    answeredQuestions: [],
     contractQuestions: [],
     contractAnswers: [],
     scroll: {},
@@ -22,35 +24,72 @@ const state = {
     loading: false
 }
 let mutations = {
-    FETCH_MISSION(state, payload){
-        Vue.set(state.mission,'state',payload);
-    },
-    SET_SCROLL(state,payload){
-        Object.keys(payload)
-            .forEach(scroll =>{
-                let documentElement = scroll;
-                let scrollStatus = payload[scroll]
-                Vue.set(state.scroll,documentElement,scrollStatus);
-            })
-      console.log("dingo")
-      console.log("dingo")
-      console.log("dingo")
+    SUBSCRIBE_KOAN(state,payload){
 
+    },
+    SET_PROGRAM(state, payload){
+            console.log("dingo program vuex",state,payload,payload.name);
+            let account = jwtDecode(localStorage.getItem('token'));
+            Vue.set(state.program, 'userId',account.sub);
+            Vue.set(state.program,'id', payload.id);
+            Vue.set(state.program, payload[0].name, true);
+            
+            Vue.set(state.program,'koans', payload[0].koans);
         
     },
-    ADD_FILE(state, payload){
+    QUESTIONS_MERGE_ANSWERS(state) {
+        console.log("running question merge..");
+        if(state.contractAnswers.length && state.contractQuestions.length){
+            state.answeredQuestions = state.contractAnswers.map((answer) => {
+                console.log("questionName dingo", answer.qaQuestionId, state.contractQuestions);
+                let question = state.contractQuestions.filter(question => question.qcontractId === answer.qaQuestionId)[0];
+                console.log("questionName filtered", question);
+                Vue.set(answer, 'questionName', question.qcontractName);
+                return answer;
+            });
+
+            console.log("dingo");
+
+                        console.log("dingo")
+
+            console.log("dingo")
+            console.log("dingo")
+
+        } else {
+            console.log("Contract Questions have not been answered...")
+        }
+
+
+    },
+    FETCH_MISSION(state, payload) {
+        Vue.set(state.mission, 'state', payload);
+    },
+    SET_SCROLL(state, payload) {
+        Object.keys(payload)
+            .forEach(scroll => {
+                let documentElement = scroll;
+                let scrollStatus = payload[scroll]
+                Vue.set(state.scroll, documentElement, scrollStatus);
+            })
+        console.log("dingo")
+        console.log("dingo")
+        console.log("dingo")
+
+
+    },
+    ADD_FILE(state, payload) {
         state.file = payload;
     },
-    START_LOADING(state){
+    START_LOADING(state) {
         state.loading = true;
     },
-    STOP_LOADING(state){
+    STOP_LOADING(state) {
         state.loading = false;
     },
     QUESTIONS_CONTRACT(state, payload) {
         state.contractQuestions = payload;
     },
-    ANSWERS_CONTRACT(state,payload){
+    ANSWERS_CONTRACT(state, payload) {
         state.contractAnswers = payload;
     },
     UPDATE_HINT(state, payload) {
@@ -78,8 +117,8 @@ let mutations = {
     },
     changeColumns(state, col) {
         console.log("dingo dingo")
-        col.columns = col.columns.filter(function(col){
-               return col.name.trim() !== 'sum' && col.name.trim() !== 'storeid';
+        col.columns = col.columns.filter(function (col) {
+            return col.name.trim() !== 'sum' && col.name.trim() !== 'storeid';
         });
         Vue.set(state.tableColumns, col.storeid, col.columns);
 
@@ -102,6 +141,7 @@ let mutations = {
     LOGOUT(state) {
         state.isLoggedIn = false;
         state.contractAnswers = [];
+        state.mission = {};
     },
     CHANGE_ACCOUNT(state, account) {
         state.account = {};
@@ -115,10 +155,41 @@ let mutations = {
 const actions = {
     //changeColumns: ({commit}, state) => commit('changeColumns',state),
     //changeRows: ({commit}, state) => commit('changeRows',state),
-    scrollStatus: ({commit}, state) => commit('SET_SCROLL',state),
-    addFile: ({commit}, state) => commit('ADD_FILE',state),
-    startLoading: ({commit}, state) => commit('START_LOADING',state),
-    stopLoading: ({commit}, state) => commit('STOP_LOADING',state),
+    subscribeProgram: function({commit},state){
+
+       
+
+
+        let account = jwtDecode(localStorage.getItem('token'));
+        let request = new Request('services/program/subscribe/?hasProgram=' + state.hasProgram + '&userId=' + account.sub, {
+            method: 'POST',
+            mode: 'cors',
+            headers: getAuthHeader(),
+            body: JSON.stringify(state)             
+        });
+
+        return new Promise((resolve, reject) => {
+            fetch(request)
+                .then(response => {
+                    if(response.ok){
+                        return response.json()
+                    } else {
+                        return reject('failed to get user program',response);
+                    }
+                })
+                .then(response => {
+                    commit('SET_PROGRAM',response);
+                    resolve(response);
+                })
+                .catch(response => resolve(response));
+        });
+
+    }.bind(this),
+    questionsMerge: ({commit},state) => commit('QUESTIONS_MERGE_ANSWERS',state),
+    scrollStatus: ({ commit }, state) => commit('SET_SCROLL', state),
+    addFile: ({ commit }, state) => commit('ADD_FILE', state),
+    startLoading: ({ commit }, state) => commit('START_LOADING', state),
+    stopLoading: ({ commit }, state) => commit('STOP_LOADING', state),
     sendDropdownPayload: ({ commit }, state) => commit('ADD_DROPDOWN_PAYLOAD', state),
     changeToken: ({ commit }, state) => commit('changeToken', state),
     changeRows: ({ commit }, state) => commit('changeRows', state),
@@ -132,7 +203,7 @@ const actions = {
             let firstLetter = columnDisplayName.charAt(0);
             let upperCase = firstLetter.toUpperCase();
             columnDisplayName = upperCase + columnDisplayName.slice(1);
-                        console.log("dingo")
+            console.log("dingo")
 
             console.log("dingo")
 
@@ -157,7 +228,42 @@ const actions = {
     changeCourse: ({ commit }, state) => commit('CHANGE_COURSE', state),
     updateHint: ({ commit }, state) => commit('UPDATE_HINT', state),
     removeHint: ({ commit }, state) => commit('REMOVE_HINT', state),
-    fetchMissionStatement: ({commit}, state) => {
+    fetchUserProgram:  ({ commit }, state) => {
+        console.log("fetchUserProgram dingo program")
+        let account = jwtDecode(localStorage.getItem('token'));
+        return new Promise((resolve, reject) => {
+            let request = new Request('services/program/' + account.sub, {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()                
+            });
+  
+
+            fetch(request)
+                .then(response => {
+                      console.log("response dingo program")
+                    if(response.ok){
+                        console.log("response ok dingo program",response);
+                        return response.json();
+                    } else {
+                        return reject('failed getting user program');
+                    }
+                })
+                .then(response => {
+                    console.log("set program dingo program")
+                    commit('SET_PROGRAM',response)
+                    console.log("dingo response",response); 
+                    console.log("dingo response",response); 
+                    
+                    return response
+                })
+                .then(response => resolve(response))
+                .catch(response => {
+                    resolve('Error getting user program... ', response);
+                });
+        });
+    },
+    fetchMissionStatement: ({ commit }, state) => {
         let account = jwtDecode(localStorage.getItem('token'));
         return new Promise(resolve => {
             let request = new Request('/services/mission/find/' + account.sub, {
@@ -168,15 +274,15 @@ const actions = {
 
             fetch(request)
                 .then(response => {
-                    if(response.ok){
+                    if (response.ok) {
                         return response.json()
                     }
                     reject(response)
                 })
-                .then(response => commit('FETCH_MISSION',response))
+                .then(response => commit('FETCH_MISSION', response))
                 .then(response => resolve(response))
-                .catch(response =>{
-                    resolve('error : ',response);
+                .catch(response => {
+                    resolve('error : ', response);
                 })
         })
     },
@@ -208,9 +314,9 @@ const actions = {
     },
     fetchContractAnswers: ({ commit }, userid) => {
         console.log("dingo")
-                console.log("dingo")
+        console.log("dingo")
 
-        
+
         let account = jwtDecode(localStorage.getItem('token'));
         return new Promise(resolve => {
             let request = new Request('services/contract/answer/list/user?userid=' + account.sub, {
@@ -223,19 +329,19 @@ const actions = {
                 }
             });
             fetch(request)
-                .then((response)=>{
-                    if(response.ok){
+                .then((response) => {
+                    if (response.ok) {
                         return response.json()
                     }
-                    throw(response);
+                    throw (response);
                 })
-                .then((response)=>{
-                    console.log("Got response for question dingo =>",response);
-                    commit('ANSWERS_CONTRACT',response);
+                .then((response) => {
+                    console.log("Got response for question dingo =>", response);
+                    commit('ANSWERS_CONTRACT', response);
                     resolve(response);
                 })
-                .catch((exception)=>{
-                    console.log("Exception getting questions",exception);
+                .catch((exception) => {
+                    console.log("Exception getting questions", exception);
                 })
 
         })
@@ -252,18 +358,18 @@ const actions = {
                 }
             });
             fetch(request)
-                .then((response)=>{
-                    if(response.ok){
+                .then((response) => {
+                    if (response.ok) {
                         return response.json()
                     }
-                    throw(response);
+                    throw (response);
                 })
-                .then((response)=>{
-                    commit('QUESTIONS_CONTRACT',response);
+                .then((response) => {
+                    commit('QUESTIONS_CONTRACT', response);
                     resolve();
                 })
-                .catch((exception)=>{
-                    console.log("Exception getting questions",exception);
+                .catch((exception) => {
+                    console.log("Exception getting questions", exception);
                 })
 
         })
@@ -328,6 +434,7 @@ const actions = {
     },
     logout({ commit }) {
         console.log("Removing the token!!!");
+        state.program = {};
         localStorage.removeItem("token")
         commit('LOGOUT');
     },
@@ -359,6 +466,18 @@ const actions = {
     }
 }
 const getters = {
+    program : state => {
+        return state.program;
+    },
+    hasProgram: state => {
+        return state.program['userId'] !== undefined;
+    },
+    getAnsweredQuestions: state => {
+        return state.answeredQuestions; 
+    },
+    hasMissionStatement: state => {
+        return state.contractAnswers.length > 0 && state.mission['state'] !== undefined;
+    },
     getMission: state => {
         return state.mission;
     },
@@ -371,14 +490,14 @@ const getters = {
     isAdmin: state => {
         return state.isAdmin;
     },
-    isContractRegistered: state =>{
-        console.log("dingo content store",state.contractAnswers)
+    isContractRegistered: state => {
+        console.log("dingo content store", state.contractAnswers)
         return state.contractAnswers.length > 0;
     },
-    getContractAnswers: state =>{
+    getContractAnswers: state => {
         return state.contractAnswers;
     },
-    getContractQuestions: state =>{
+    getContractQuestions: state => {
         return state.contractQuestions;
     },
     getColState: (state, getters) => (storeid) => {
@@ -389,8 +508,8 @@ const getters = {
     questions: (state, getters) => (questionid) => {
         return state.questions[questionid];
     },
-    question:(state, getters) => (storeid, id) =>{
-        let question = state.questions[storeid].filter((question)=>{
+    question: (state, getters) => (storeid, id) => {
+        let question = state.questions[storeid].filter((question) => {
             return question.id = id;
         });
 
@@ -403,19 +522,19 @@ const getters = {
 
         return state.hints[coursetype];
     },
-    getFile: state=>{
+    getFile: state => {
         return state.file;
     },
-    getLoading: state=>{
+    getLoading: state => {
         return state.loading;
     },
     scrollStatus: (state, getters) => (document) => {
-          console.log("dingo ")
-                    console.log("dingo ")
+        console.log("dingo ")
+        console.log("dingo ")
 
-          console.log("dingo ")
+        console.log("dingo ")
 
-         return state.scroll[document]
+        return state.scroll[document]
     }
 }
 

@@ -13,6 +13,7 @@ import clientRadio from "../buttons/clientRadio.vue";
 import clientSpinner from "../spinner/clientSpinner.vue";
 import clientFileselect from "../buttons/clientFileselect.vue";
 import clientAccordion from "../layout/clientAccordion.vue";
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import mixPersistence from '../../mixins/mixPersistence';
 import mixGrids from '../../mixins/mixGrids'
 import { EventBus } from '../../eventbus/index';
@@ -26,6 +27,8 @@ export default {
     },
     data: function () {
         return {
+            color: 'green',
+            loading: false,
             editorValue: null,
             editorContent: "<h4>Editor</h4>",
             loading: false,
@@ -52,7 +55,8 @@ export default {
         clientFileselect,
         clientSpinner,
         clientAccordion,
-        s2aAdminModal
+        s2aAdminModal,
+        PulseLoader
     },
     methods: {
         addAProgramProgram(){
@@ -68,9 +72,11 @@ export default {
                                     }
                                     return acc; 
                                 },{}),
-                testerId : this.account.sub
+                testerId : this.account.sub,
+                koan: this.programModel.name
 
             }
+
              this.persistencePost('services/program/add',submitModel)
                 .then(response => {
                     if(response.ok){
@@ -226,7 +232,7 @@ export default {
         },
         createQuestion() {
 
-            
+            this.loading = true;
             this.questionFormModel.values = this.questionFormSchema.fields.reduce(function(acc, curr){
                 
                 //Check if an additional value
@@ -263,8 +269,14 @@ export default {
             console.log("request?", request);
             fetch(request)
                 .then((response) => {
-                    console.log("dingo");
-                });
+                    this.loading = false;
+                    for(var prop in this.questionFormModel){
+                        this.questionFormModel[prop] = null;
+                    }
+                })
+                .catch(response => {
+                    this.loading = false
+                })
 
         },
         deleteQuestion() {
@@ -474,9 +486,14 @@ export default {
                     </div>
                     <div class="panel panel-footer">
                         <span v-if="questionScreen==='input'">
+                            <pulse-loader :loading="loading" :color="color" ></pulse-loader>
                             <button class="btn btn-default" @click="addSelectionValue('questionForm')">Add Value</button>
-    
+                           
+                                
                             <button class="btn btn-primary" @click="createQuestion">Submit Question</button>
+                                
+                           
+                            
                         </span>
                         <span v-else-if="questionScreen === 'upload'">
                             <button class="btn btn-primary" @click="bulkAddQuestion">Upload Excel Questions</button>

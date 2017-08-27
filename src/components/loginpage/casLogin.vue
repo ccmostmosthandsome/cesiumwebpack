@@ -18,7 +18,8 @@
                         {
                             "model" : 'password',
                             "label" : 'Password',
-                            "type"  : 'input'
+                            "type"  : 'input',
+                            "inputType" : 'password'
                         }
                     ]
                 }

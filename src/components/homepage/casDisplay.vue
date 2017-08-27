@@ -17,8 +17,9 @@ export default {
 
 <style>
     .jumbotron {
-        background: url('../../images/metroMap.jpg');
-        background-color: #17234E;
+       /* background: url('../../images/rocks.jpg'); */ 
+       /* background: url('../../images/metroMap.jpg'); */
+        background-color: rgb(55,56,61);
         margin-bottom: 20px;
         min-height: 50%;
         width: 100%;

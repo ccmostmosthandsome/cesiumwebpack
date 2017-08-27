@@ -61,15 +61,15 @@ export default {
             }
         },
         menuList() {
-            console.log("menu list? =?", this.menuContext[this.model.attr.type]);
-            return this.menuContext[this.model.attr.type];
+           // console.log("menu list? =?", this.menuContext[this.model.attr.type]);
+           // return this.menuContext[this.model.attr.type];
         },
         showMenu() {
             //return false;
 
             console.log("this menu context =>", this.menuContext);
-            return this.menuContext[this.model.attr.type].list && this.menuContext[this.model.attr.type].list.length ?
-                true : false;
+          /*  return this.menuContext[this.model.attr.type].list && this.menuContext[this.model.attr.type].list.length ?
+                true : false;*/
         },
         hidingRoot() {
             return !this.showRoot && this.model.id === 'Root';

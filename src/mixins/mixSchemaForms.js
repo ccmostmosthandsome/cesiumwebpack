@@ -97,7 +97,7 @@ export default {
                 explanation: null,
                 coursetype: null,
                 modtype: null,
-                type: null
+                koan: null
             },
             manageQuestionSchema: {
                 fields: [
@@ -132,6 +132,12 @@ export default {
                         label: "modtype",
                         model: "modtype",
                         values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
+                    },
+                    {
+                        type: "select",
+                        label: "Koan",
+                        model: "koan",
+                        values: ["ASVAB", "GED", "CW"]
                     }
                 ]
             },
@@ -200,6 +206,7 @@ export default {
                 question: null,
                 coursetype: null,
                 modtype: null,
+                koan: null,
                 answerId: null,
                 explanation: null,
                 questionValue_1: null,
@@ -227,6 +234,11 @@ export default {
                         label: "modtype",
                         model: "modtype",
                         values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
+                    },{
+                        type: "select",
+                        label: "Koan",
+                        model: "koan",
+                        values: ["GED","ASVAB","CW"]
                     },
                     {
                         type: "input",

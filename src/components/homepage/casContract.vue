@@ -1,5 +1,6 @@
 <template>
     <div class="contractQuestions">
+        <p>{{hasAnsweredQuestions}}</p>
         <span v-if="hasAnsweredQuestions">
             <div class="container">
                 <div class="row">
@@ -24,7 +25,7 @@
             </div>
     
         </span>
-        <span v-else-if="!hasAnsweredQuestions">
+        <span v-else>
     
             <vue-form-generator :schema="contractQuestionSchema" :model="contractQuestionModel">
     
@@ -96,8 +97,6 @@ export default {
             return returnObject
         }
 
-    },
-    created() {
     },
     methods: {
         init() {

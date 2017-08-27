@@ -61,8 +61,9 @@ export default {
             })
         },
         persistenceGet(url,parameters){
+            let compiledUrl = parameters ? url + parameters : url; 
             return new Promise((resolve,reject)=>{
-                let request = new Request(url + parameters, {
+                let request = new Request(compiledUrl, {
                     method: 'GET',
                     mode: 'cors',
                     headers: this.getHeader()
@@ -71,12 +72,14 @@ export default {
                 return fetch(request)
                     .then((response) => {
                         if (response.ok) {
+                            console.log("returning koan =>");
                             return response.json()
                         }
+                        console.log("Not returning koan =>");
                         return reject('get failed', response);
                     })
                     .then((response) => {
-                       return  resolve(response);
+                        resolve(response);
                     })
                     .catch((response)=>{
                         console.log("Major failure here=>",response);

@@ -7,6 +7,7 @@
         <div v-for="(program, key) in dashboardGrades" v-bind:key="key" style="display: inline-block;">
           <strong>{{key}} {{program.grade}}</strong>
         </div>
+         
         
       
       </div>
