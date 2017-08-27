@@ -10,8 +10,7 @@
                 <hr class="bottom-line">
                 <div class="container">
                     <div class="row">
-                        <div class="col-md-4 col-sm-6 padleft-right" v-for="(koan, key) in koans" :key="key">
-                            
+                        <div class="col-md-4 col-sm-6 padleft-right" v-for="(koan, key) in koans" :key="key">  
                             <span v-if="hasProgram">
                                 <!-- Check vuex state map for program name-->
                                 <span v-if="program[Object.keys(koan)[0]]">
