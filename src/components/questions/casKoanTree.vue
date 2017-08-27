@@ -1,6 +1,6 @@
 <template>
         <div>
-            <p>dingo koans: {{koans}}</p>
+            
             <cas-tree :model="tree" :menuSchema="schema.menuSchema" />
         </div>    
 </template>
