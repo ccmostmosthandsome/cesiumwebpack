@@ -3,7 +3,6 @@
 
         <div class="row">
             <div class="header-section text-center">
-                <p>Program dingo: {{program}} </p>
                 <h2>Koans{{hasProgram}}</h2>
                 <p>A kōan (公案) (/ˈkoʊ.ɑːn/; Chinese: 公案; pinyin: gōng'àn, [kʊ́ŋ ân]; Korean: 공안 kong'an; Vietnamese: công án) is a story, dialogue, question, or statement, which is used in Zen practice to provoke the "great doubt" and test a student's progress.
                     <br> Develop and map your life with the following koans.</p>

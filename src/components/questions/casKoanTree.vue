@@ -1,9 +1,8 @@
 <template>
- 
-       
-        <cas-tree :model="tree" :menuSchema="schema.menuSchema" />
-
-    
+        <div>
+            <p>dingo koans: {{koans}}</p>
+            <cas-tree :model="tree" :menuSchema="schema.menuSchema" />
+        </div>    
 </template>
 
 <script>
@@ -16,14 +15,15 @@ export default {
     beforeRouteEnter: function(to, from, next){
         //Get Program
         //Q All promise through it to get questins which match koans
-        store.getters.program
+        store.dispatch('fetchUserProgram')
+                .then(response => next());
     },
     components: { casTree },
     computed: {
         questions: {
-            cache: false,
+            cache: true,
             get() {
-                return this.$store.getters.questions('GED');
+                return this.$store.getters.questions(this.koans);
             }
         },
         questionsByCourse: {
@@ -47,15 +47,13 @@ export default {
             console.log("dingo getting koans..")
             let program = this.$store.getters.program
             return program.koans.map(koan => koan.koan)
+        },
+        parsedQuestions(){
+            return this.questions.filter(question => this.koans.indexOf(question.koan) >= 0);
         }
     },
     created() {
-        this.$store.dispatch("getQuestions", 'GED')
-            .then((response) => {
-                console.log("Creating tree!!!!!!!!!!", this.schema, this.questions);
-                this.loading = false;
-                this.createTree();
-            })
+        
     },
     data: function () {
         return {
@@ -64,13 +62,29 @@ export default {
         }
     },
     methods: {
-        getKoan(){
-            
+        getKoans(){
+            var questionObject = this.parsedQuestions.reduce(function (acc, curr) {
+                var context = this;
+                context.parent = curr;
+                if (!acc[curr.koan]) {
+                    acc[curr.koan] = {
+                        "id": curr.koan,
+                        "text": curr.koan,
+                        "parent": 'Root',
+                        "attr": { "type": 'course' },
+                        "children": this.getCourses.call(context)
+                    }
+                }
+                return acc;
+            }.bind(this), {})
+            return Object.keys(questionObject)
+                .map((question) => { return questionObject[question] })
+                .filter(question => question.id);            
         },
         getCourses() {
             
 
-            var questionObject = this.questions.reduce(function (acc, curr) {
+            var questionObject = this.parsedQuestions.reduce(function (acc, curr) {
                 var context = this;
                 context.parent = curr;
                 if (!acc[curr.coursetype]) {
@@ -90,7 +104,7 @@ export default {
 
         },
         getModules() {
-            var moduleObject = this.questions.reduce(function (acc, curr) {
+            var moduleObject = this.parsedQuestions.reduce(function (acc, curr) {
                 if (!acc[curr.modtype] && this.parent.coursetype === curr.coursetype) {
                     acc[curr.modtype] = {
                         "id": curr.id,
@@ -117,7 +131,7 @@ export default {
             this.$set(this.tree, 'id', 'Root')
             this.$set(this.tree, 'attr', { 'type': 'course' })
             this.$set(this.tree, 'parent', 'false')
-            this.$set(this.tree, 'children', this.getCourses());
+            this.$set(this.tree, 'children', this.getKoans());
             console.log("dingo");
             console.log("dingo")
 
@@ -129,6 +143,7 @@ export default {
     },
     mounted(){
         console.log("Dingo koan tree activated!!!");
+        this.createTree();
     }
 }
 </script>

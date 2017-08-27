@@ -29,12 +29,15 @@ let mutations = {
     },
     SET_PROGRAM(state, payload){
             console.log("dingo program vuex",state,payload,payload.name);
-            let account = jwtDecode(localStorage.getItem('token'));
-            Vue.set(state.program, 'userId',account.sub);
-            Vue.set(state.program,'id', payload.id);
-            Vue.set(state.program, payload[0].name, true);
-            
-            Vue.set(state.program,'koans', payload[0].koans);
+            if(payload.length){
+                let account = jwtDecode(localStorage.getItem('token'));
+                Vue.set(state.program, 'userId',account.sub);
+                Vue.set(state.program,'id', payload.id);
+                Vue.set(state.program, payload[0].name, true);
+                
+                Vue.set(state.program,'koans', payload[0].koans);
+            }
+
         
     },
     QUESTIONS_MERGE_ANSWERS(state) {
@@ -470,6 +473,7 @@ const getters = {
         return state.program;
     },
     hasProgram: state => {
+        console.log("dingo program ???",state.program);
         return state.program['userId'] !== undefined;
     },
     getAnsweredQuestions: state => {
@@ -505,8 +509,16 @@ const getters = {
 
         return state.tableColumns[storeid]
     },
-    questions: (state, getters) => (questionid) => {
-        return state.questions[questionid];
+    questions: (state, getters) => (koans) => {
+        let questions = [];
+        for(var type in state.questions){
+            console.log("dingo store questions type",koans.indexOf(type));
+            if(koans.indexOf(type) >= 0){
+                questions= questions.concat(state.questions[type]);
+            }
+        }
+        console.log("dingo store questions post concat",questions);
+        return questions;
     },
     question: (state, getters) => (storeid, id) => {
         let question = state.questions[storeid].filter((question) => {
