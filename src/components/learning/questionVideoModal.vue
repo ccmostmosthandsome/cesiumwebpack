@@ -11,43 +11,24 @@
 
 <script>
 import clientModal from '../modal/clientModal.vue'
-import { EventBus } from '../../eventbus/index';
-
 export default {
-    components: { clientModal },
+    name: 'questionVideoModal',
     computed: {
-        showModal: {
-            get() {
-                return this.open;
-            },
-            set(isOpen) {
-                this.open = isOpen;
-            }
-
+        get(){
+            return this.open;
+        },
+        set(isOpen){
+            this.open = isOpen
         }
-    },
-    mounted() {
-        EventBus.$on('modalSelected', function () {
-            this.showModal = true;
-        }.bind(this));
-
-        EventBus.$on('event', function (input) {
-            folderInput = input;
-        })
-
     },
     methods: {
         closeModal() {
             //Handle form cleanup stuff here... No form yet
-            this.$emit('formSubmitted');
+            this.$emit('closeVideo');
             
         },
         hideModal() {
-            this.$emit('formCanceled');
-        },
-        modelUpdated(value, schema) {
-            console("model has changed...", value, schema);
-
+            this.$emit('closeVideo');
         }
     },
     props: {

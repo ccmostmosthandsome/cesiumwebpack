@@ -1,5 +1,7 @@
 <script>
 
+import { mapGetters } from 'vuex';
+import _ from 'lodash';
 import VueFormGenerator from "../vue-form-generator";
 import mixQuestions from "./mixQuestions";
 import mixAuth from "../../auth/mixAuth";
@@ -9,6 +11,7 @@ import clientGrid from "../grids/clientGrid.vue";
 //import clientModal from "../layout/clientModal.vue";
 import clientModal from "../modal/clientModal.vue"
 import s2aAdminModal from "./s2aAdminModal.vue"
+import casNewKoan from "./casNewKoan.vue";
 import clientRadio from "../buttons/clientRadio.vue";
 import clientSpinner from "../spinner/clientSpinner.vue";
 import clientFileselect from "../buttons/clientFileselect.vue";
@@ -17,16 +20,45 @@ import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import mixPersistence from '../../mixins/mixPersistence';
 import mixGrids from '../../mixins/mixGrids'
 import { EventBus } from '../../eventbus/index';
-
+import store from '../../store/index.js';
 export default {
     name: 'casAdmin',
+    beforeRouteEnter: function(to, from, next) {
+        store.dispatch('setAllKoans')
+            .then(response => {
+                console.log("Got response from set all koans...", response);
+                return response;
+            })
+            .then(response => next())
+            .catch(response => console.log("Error getting koans for admin tools"));
+    },
     computed: {
+        questionSchemaGED: {
+            get() {
+                console.log("dingo computed setter for vues getter", this);
+                return this.$store.getters.questionSchema;
+            },
+            set(koan) {
+                console.log("dingo computed setter for vues", this);
+                this.$store.dispatch('setQuestionSchema', koan);
+            }
+        },
         spinnerLoading() {
             return this.$store.getters.getLoading;
-        }
+        },
+        ...mapGetters([
+            'koanCourseFactory',
+            'koanNameModel',
+            'koanNameSchema',
+            'koanListModel',
+            'koanListSchema'
+        ])
     },
-    data: function () {
+    data: function() {
         return {
+            koans: {
+                initial : 'initial'
+            },
             color: 'green',
             loading: false,
             editorValue: null,
@@ -46,9 +78,10 @@ export default {
             tabCounter: 0
             //id	question	answer	selections	explanation	coursetype	modtype	type
         }
-           
+
     },
     components: {
+        casNewKoan,
         clientModal,
         clientGrid,
         clientRadio,
@@ -59,35 +92,62 @@ export default {
         PulseLoader
     },
     methods: {
-        addAProgramProgram(){
-            console.log("Adding program dingo",this.programModel);
+        submitKoan() {
 
-            let submitModel = {
-                name: this.programModel.name,
-                grades : Object.keys(this.programModel)
-                                .reduce((acc,curr)=>{
-                                    if(curr.indexOf('_') !== -1){
-                                        console.log(curr,curr.split('_')[1])
-                                        acc[this.programModel[curr]]= 0; 
-                                    }
-                                    return acc; 
-                                },{}),
-                testerId : this.account.sub,
-                koan: this.programModel.name
+            console.log("dingo");
+
+            console.log("dingo");
+            
+            for(let koanItem in this.koanCourseFactory){
+                let courses = this.koanCourseFactory[koanItem].schema.fields
+                                        .filter(field => field.label == "Course");
+                let focusAreas = this.koanCourseFactory[koanItem].schema.fields
+                                        .filter(field => field.label == "Focus Area");
+                
+                console.log("dingo dingo dingo");
+                console.log("dingo dingo dingo");
+
+                console.log("dingo dingo dingo");
 
             }
+            
+            let submitModel = {
+                name: this.koanNameModel.name,
+                courseGrades: Object.keys(koanListModel)
+                    .reduce((acc, curr) => {
+                        if (curr.indexOf('_') !== -1) {
+                            console.log(curr, curr.split('_')[1])
+                            acc[koanListModel[curr]] = 0;
+                        }
+                        return acc;
+                    }, {}),
+                focusAreaGrades: Object.keys(koanListModel)
+                    .reduce((acc, curr) => {
+                        if (curr.indexOf('_') !== -1) {
+                            console.log(curr, curr.split('_')[1])
+                            acc[koanListModel[curr]] = 0;
+                        }
+                        return acc;
+                    }, {}),
+                testerId: this.account.sub,
+                koan: this.koanNameModel.name
 
-             this.persistencePost('services/program/add',submitModel)
+            }
+            console.log("Submit Model =>",submitModel);
+            this.persistencePost('services/program/add', submitModel)
                 .then(response => {
-                    if(response.ok){
+                    if (response.ok) {
                         return response.json
-                    } 
+                    }
                     console.log("API Call failed")
                 })
                 .then(response => {
-                    console.log("Added Program",response);
+                    console.log("Added Program", response);
                 })
-
+        },
+        addCourse(){
+            let name = "koan" + Math.floor(Math.random() * 3377);
+            this.$set(this.koans,name,name);
         },
         getEditorValue(data) {
             console.log(" this is the data =>", data);
@@ -104,47 +164,9 @@ export default {
             console.log("dingo this was selected...", selected);
             this.questionScreen = selected;
         },
-        addSelectionValue(form) {
-            //Mutates state
-            let model = form + 'Model',
-                schema = form + 'Schema';
-            let questionNumbers = this.addSelectionValue_getIndexes(model);
-            this.addSelectionValue_setNewValue(questionNumbers, model, schema)
-        },
-        addSelectionValue_getIndexes(model) {
-            console.log("dingo")
-            return Object.keys(this[model])
-                .reduce((acc, curr) => {
-                    var indexNum = +curr.split('_')[1]
-                    if (!isNaN(indexNum)) {
-                        indexNum++
-                        acc.push(indexNum);
-                    }
-                    return acc;
-                }, []);
-        },
-        addSelectionValue_setNewValue(numbers, model, schema) {
-            numbers.forEach((questionIndex) => {
-                console.log("question index=>", questionIndex, !this.contractQuestionModel["qcontractValue_" + questionIndex], this.contractQuestionModel);
-                if (this[model]["selectvalue_" + questionIndex] === undefined) {
-                    this[model]["selectvalue_" + questionIndex] = null;
-                    this[schema].fields.push(
-                        {
-                            "type": 'input',
-                            "model": 'selectvalue_' + questionIndex,
-                            "label": 'Question ' +  questionIndex
-
-                        }
-                    )
-
-                }
-
-
-            })
-        },
         bulkAddQuestion() {
             this.loading = true;
-            let normalizedQuestions = this.bulkExcelDocuments.sheets.Questions.map(function (newquestion) {
+            let normalizedQuestions = this.bulkExcelDocuments.sheets.Questions.map(function(newquestion) {
                 console.log("dingo");
                 let selections = this.bulkExcelDocuments
                     .sheets
@@ -174,7 +196,7 @@ export default {
                 }
             }.bind(this))
 
-            let normalizedContent = this.bulkExcelDocuments.sheets.Content.map(function (content) {
+            let normalizedContent = this.bulkExcelDocuments.sheets.Content.map(function(content) {
                 return {
                     questionId: content.QuestionID,
                     questionhint: content.Hint,
@@ -233,12 +255,12 @@ export default {
         createQuestion() {
 
             this.loading = true;
-            this.questionFormModel.values = this.questionFormSchema.fields.reduce(function(acc, curr){
-                
+            this.questionFormModel.values = this.questionFormSchema.fields.reduce(function(acc, curr) {
+
                 //Check if an additional value
                 let value = +curr.model.split('_')[1];
                 //Grab the value's 
-                
+
                 if (!isNaN(value)) {
                     let questionIndexNumber = parseInt(curr.label.split(' ')[1]);
                     let questionId = Math.floor(Math.random() * 9999);
@@ -249,7 +271,7 @@ export default {
                     //If the question index matches the user's correct answer# than replace the answerId with the question-value's questionId. 
                     questionIndexNumber === parseInt(this.questionFormModel.answerId) ? this.questionFormModel.answerId = questionId : '';
 
-                    console.log("WTF??",this.questionFormModel);
+                    console.log("WTF??", this.questionFormModel);
                 }
                 return acc;
             }.bind(this), [])
@@ -270,7 +292,7 @@ export default {
             fetch(request)
                 .then((response) => {
                     this.loading = false;
-                    for(var prop in this.questionFormModel){
+                    for (var prop in this.questionFormModel) {
                         this.questionFormModel[prop] = null;
                     }
                 })
@@ -289,7 +311,7 @@ export default {
             }
 
             fetch('/services/questions/delete', requestLogin)
-                .then(function (response) {
+                .then(function(response) {
                     console.log("dingo")
                     console.log("dingo")
                     console.log("dingo")
@@ -315,8 +337,8 @@ export default {
             console.log("dingo")
             console.log("dingo")
             console.log("dingo")
-           // this.$refs.dialog.openModal();
-           this.modalstatus = true;
+            // this.$refs.dialog.openModal();
+            this.modalstatus = true;
 
         },
         handleModal(event) {
@@ -356,7 +378,7 @@ export default {
 
         },
         showMathJax() {
-            this.$nextTick(function () {
+            this.$nextTick(function() {
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
             });
 
@@ -429,7 +451,11 @@ export default {
 
     mixins: [mixQuestions, mixAuth, mixPersistence, mixXlsx, mixGrids, mixSchemaForms],
     mounted() {
-        this.$nextTick(function () {
+        this.questionSchemaGED = 'GED';
+        console.log("dingo computed setter for vues mounted component=>", this.questionSchemaGED);
+
+
+        this.$nextTick(function() {
             MathJax.Hub.Typeset()
         });
 
@@ -445,8 +471,8 @@ export default {
 </style>
 <template>
     <div>
-    
-        <b-tabs  ref="tabs" v-model="tabIndex">
+
+        <b-tabs ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
                 <div class="panel panel-default">
                     <div class="panel panel-header">
@@ -466,53 +492,49 @@ export default {
                                     <strong slot="header">
                                         <u>Panel #1</u>
                                     </strong>
-                                    
+
                                 </panel>
                             </client-accordion>
                             <div class="btn-group" role="group" aria-label="Bulk Upload Group Bar">
-    
+
                                 <div style="display: inline-block;">
                                     <client-fileselect @input="handleFileUpload" type="excel" />
                                 </div>
-    
+
                             </div>
-    
+
                         </div>
                         <div v-if="spinnerLoading">
                             <client-spinner></client-spinner>
                         </div>
-                        
-    
+
                     </div>
                     <div class="panel panel-footer">
                         <span v-if="questionScreen==='input'">
-                            <pulse-loader :loading="loading" :color="color" ></pulse-loader>
+                            <pulse-loader :loading="loading" :color="color"></pulse-loader>
                             <button class="btn btn-default" @click="addSelectionValue('questionForm')">Add Value</button>
-                           
-                                
+
                             <button class="btn btn-primary" @click="createQuestion">Submit Question</button>
-                                
-                           
-                            
+
                         </span>
                         <span v-else-if="questionScreen === 'upload'">
                             <button class="btn btn-primary" @click="bulkAddQuestion">Upload Excel Questions</button>
-    
+
                         </span>
                         <span v-else>
                             <label>
                                 <h4>Select a Value</h4>
                             </label>
                         </span>
-    
+
                     </div>
-    
+
                 </div>
-    
+
             </b-tab>
             <b-tab title="Add Question Content">
                 <div class="content">
-    
+
                     <vue-form-generator :schema="questionMaterialSchema" :model="questionMaterialModel"></vue-form-generator>
                     </br>
                     <button class="btn btn-default" @click="showMathJax()">Update Mathjax</button>
@@ -523,9 +545,9 @@ export default {
                     <p>Result... {{latex}}</p>
                     <hr/>
                     <button class="btn btn-primary" @click="addQuestionMaterial">submit</button>
-    
+
                 </div>
-    
+
             </b-tab>
             <b-tab title="Create Contract Questions">
                 <div class="panel panel-default">
@@ -535,42 +557,44 @@ export default {
                     <div class="panel panel-footer">
                         <button class="btn btn-default" @click="addSelectionValue('contractQuestion')">Add Value</button>
                         <button class="btn btn-default" @click="submitContractQuestion" v-if="submit === 'question'">Submit -- {{submit}}</button>
-    
+
                     </div>
                 </div>
             </b-tab>
-            <b-tab title="Add Programs">
-                 <div class="panel panel-default">
+            <b-tab title="Add Koans">
+                <div class="panel panel-default">
                     <div class="panel panel-body">
-                        <vue-form-generator :schema="programSchema" :model="programModel" />
+                        <vue-form-generator :schema="koanNameSchema" :model="koanNameModel" />
+                        <!-- <vue-form-generator :schema="koanListSchema" :model="koanListModel" /> -->
+                        <cas-new-koan v-for="(name,index) in koans" :track-by="index"></cas-new-koan>
+                        
+
+
                     </div>
                     <div class="panel panel-footer">
-                        <button class="btn btn-default" @click="addSelectionValue('program')">Add Course</button>
-                        <button class="btn btn-default" @click="addAProgramProgram">Submit</button>
-    
+                        <button class="btn btn-default" @click="addCourse()">Add Course</button>
+                        <button class="btn btn-default" @click="submitKoan">Submit</button>
+
                     </div>
-                </div>               
+                </div>
             </b-tab>
             <b-tab title="Sharpening Questions" @click="getQuestions">
                 <div style="overflow-x: scroll">
                     <client-grid gridid="adminQuestions" v-on:rowSelected="openModal"></client-grid>
-    
+
                 </div>
-    
+
             </b-tab>
-    
+
         </b-tabs>
         <span style="padding-top: 30px;">
 
-
-            <s2a-admin-modal :open="modalstatus" 
-                @formSubmitted="handleModal"
-                @formCanceled="modalstatus = false">
+            <s2a-admin-modal :open="modalstatus" @formSubmitted="handleModal" @formCanceled="modalstatus = false">
                 <div slot="form">
                     <vue-form-generator :model="manageQuestionModel" :schema="manageQuestionSchema"></vue-form-generator>
                 </div>
             </s2a-admin-modal>
         </span>
-    
+
     </div>
 </template>

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import jwtDecode from 'jwt-decode';
 import { getAuthHeader } from '../auth/modAuth';
+import admin from './modules/admin';
 Vue.use(Vuex)
 
 const state = {
@@ -289,9 +290,39 @@ const actions = {
                 })
         })
     },
-    getByCourse: ({ commit }, course) => {
+    getQuestionsByFocusArea: ({commit},payload) =>{
+
+        return new Promise((resolve,reject)=>{
+            let request = new Request('/services/questions/' + payload.koan + '/' + payload.parent.coursetype + '/' + payload.item,  {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()
+            });
+            fetch(request)
+            .then((response) => {
+                if (response.ok) {
+                    return response.json()
+                }
+                 reject(response)
+            })
+            .then((response) => {
+                var returnObject = {
+                    type: payload.item,
+                    records: response
+                }
+    
+                
+                resolve(commit('ADD_QUESTIONS', returnObject));
+            })
+            .catch(response =>{
+                resolve("Error in getting focus area...",response);
+            })
+        })
+
+    },
+    getQuestionsByKoan: ({commit},payload) =>{
         return new Promise(resolve => {
-            let request = new Request('/services/questions/get/coursetype?coursetype=' + course, {
+            let request = new Request('/services/questions/' + payload.koan, {
                 method: 'GET',
                 mode: 'cors',
                 headers: getAuthHeader()
@@ -305,7 +336,33 @@ const actions = {
                 })
                 .then((response) => {
                     var returnObject = {
-                        type: course,
+                        type: payload.item,
+                        records: response
+                    }
+
+                    commit('ADD_QUESTIONS', returnObject);
+                    resolve();
+                })
+        });      
+    },
+    getByCourse: ({ commit }, payload) => {
+        console.log("getting questions with course + koan dingo !!!!!!!!!!!!!!",payload);
+        return new Promise(resolve => {
+            let request = new Request('/services/questions/' + payload.koan + '/' + payload.item, {
+                method: 'GET',
+                mode: 'cors',
+                headers: getAuthHeader()
+            });
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json()
+                    }
+                    throw (response)
+                })
+                .then((response) => {
+                    var returnObject = {
+                        type: payload.item,
                         records: response
                     }
 
@@ -410,7 +467,7 @@ const actions = {
         })
     },
     login: ({ commit }, creds) => {
-        return new Promise(resolve => {
+        return new Promise((resolve,reject) => {
             const requestLogin = {
                 method: 'POST',
                 mode: 'cors',
@@ -424,15 +481,19 @@ const actions = {
             fetch('/services/auth', requestLogin)
                 .then((response) => {
                     if (!response.ok) {
-                        throw Error(response.statusText);
+                         reject(response.statusText);
                     }
-                    return response.json();
+                     return response.json();
                 })
-                .then((response) => {
-                    localStorage.setItem("token", response.token);
-                    commit('LOGIN_SUCCESS');
-                    resolve();
+                .then((response,err) => {
+                    if(!err){
+                        localStorage.setItem("token", response.token);
+                        commit('LOGIN_SUCCESS');
+                        return resolve('success');
+                    }
+
                 })
+                .catch(response => resolve(response))
         });
     },
     logout({ commit }) {
@@ -554,5 +615,8 @@ export default new Vuex.Store({
     state,
     getters,
     actions,
-    mutations
+    mutations,
+    modules: {
+        admin
+    }
 })

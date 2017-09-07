@@ -34,7 +34,7 @@ export default {
 
                     }
                 ]
-            },
+            },/*
             programModel: {
                 name: null,
                 programId: Math.floor(Math.random() * 3307),
@@ -56,7 +56,7 @@ export default {
                         model: "gradesValue_1"
                     }                 
                 ]
-            },
+            },*/
             contractQuestionModel: {
                 qcontractName: null,
                 qcontractValue_1: null,

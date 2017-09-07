@@ -23,7 +23,7 @@ module.exports = {
             './jszip' : 'jszip'
         }
     ],
-    devtool: 'eval-source-map',
+    devtool: 'eval-source-map',  
     resolve: {
         alias: {
             'vue$': 'vue/dist/vue.esm.js'

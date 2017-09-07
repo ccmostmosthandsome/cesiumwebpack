@@ -3,7 +3,8 @@
         <!-- 
                 			Recursive component used to create tree. 
                 			Context menu displayed via "showMenu" computed value which checks that attribute is defined in the context menu's schema.
-                			iconCollection css class used to display block level elements in-line
+                			iconCollection css class us
+                            ed to display block level elements in-line
                 			:key's are used for elements so that eventual Vue-CSS transitions can be used			
                 		-->
         <li v-bind:key="model.id" style="display:block">
@@ -62,14 +63,14 @@ export default {
         },
         menuList() {
            // console.log("menu list? =?", this.menuContext[this.model.attr.type]);
-           // return this.menuContext[this.model.attr.type];
+            return this.menuContext[this.model.attr.type];
         },
         showMenu() {
             //return false;
 
             console.log("this menu context =>", this.menuContext);
-          /*  return this.menuContext[this.model.attr.type].list && this.menuContext[this.model.attr.type].list.length ?
-                true : false;*/
+            return this.menuContext[this.model.attr.type].list && this.menuContext[this.model.attr.type].list.length ?
+                true : false;
         },
         hidingRoot() {
             return !this.showRoot && this.model.id === 'Root';
@@ -121,9 +122,11 @@ export default {
     mounted() {
         console.log("dingo in tree =>>", this);
         EventBus.$on('dropdownSelected', (selected) => {
+            console.log("Dropdown Selected dingo => ",selected,this.model);
 
             this.model.selection = selected;
             if (selected.selectedId === this.model.id) {
+                
                 EventBus.$emit('modelSelected', this.model);
             }
 

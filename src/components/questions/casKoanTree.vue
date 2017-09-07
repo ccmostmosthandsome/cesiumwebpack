@@ -7,7 +7,7 @@
 
 <script>
 import casTree from "../tree/casTree.vue";
-import menuSchema from '../tree/courseQuestionDropdown';
+import menuSchema from '../../schemas/treeDropdown';
 import store from '../../store/index.js';
 
 export default {
@@ -48,7 +48,7 @@ export default {
             let program = this.$store.getters.program
             return program.koans.map(koan => koan.koan)
         },
-        parsedQuestions(){
+        koanQuestions(){
             return this.questions.filter(question => this.koans.indexOf(question.koan) >= 0);
         }
     },
@@ -58,21 +58,25 @@ export default {
     data: function () {
         return {
             tree: {},
+            courseKoanQuestions : {},
             schema: menuSchema
         }
     },
     methods: {
         getKoans(){
-            var questionObject = this.parsedQuestions.reduce(function (acc, curr) {
+            var questionObject = this.koanQuestions.reduce(function (acc, curr) {
                 var context = this;
                 context.parent = curr;
+                
                 if (!acc[curr.koan]) {
+                    this.courseKoanQuestions[curr.koan] = this.koanQuestions.filter(question => question.koan == curr.koan);
+                    this.koanQuestions
                     acc[curr.koan] = {
                         "id": curr.koan,
                         "text": curr.koan,
-                        "parent": 'Root',
-                        "attr": { "type": 'course' },
-                        "children": this.getCourses.call(context)
+                        "parent": this.parent,
+                        "attr": { "type": 'koan' },
+                        "children": this.getCourses.call(context,curr.koan)
                     }
                 }
                 return acc;
@@ -81,19 +85,20 @@ export default {
                 .map((question) => { return questionObject[question] })
                 .filter(question => question.id);            
         },
-        getCourses() {
+        getCourses(koan) {
             
 
-            var questionObject = this.parsedQuestions.reduce(function (acc, curr) {
+            var questionObject = this.courseKoanQuestions[koan].reduce(function (acc, curr) {
                 var context = this;
                 context.parent = curr;
-                if (!acc[curr.coursetype]) {
+                console.log("dingo this.parent.koan", this.courseKoanQuestions[koan] );
+                if (!acc[curr.coursetype] && this.parent.koan == curr.koan) {
                     acc[curr.coursetype] = {
                         "id": curr.coursetype,
                         "text": curr.coursetype,
                         "parent": this.parent,
                         "attr": { "type": 'course' },
-                        "children": this.getModules.call(context)
+                        "children": this.getModules.call(context,koan)
                     }
                 }
                 return acc;
@@ -103,13 +108,13 @@ export default {
                 .filter(question => question.id);
 
         },
-        getModules() {
-            var moduleObject = this.parsedQuestions.reduce(function (acc, curr) {
+        getModules(koan) {
+            var moduleObject = this.courseKoanQuestions[koan].reduce(function (acc, curr) {
                 if (!acc[curr.modtype] && this.parent.coursetype === curr.coursetype) {
                     acc[curr.modtype] = {
-                        "id": curr.id,
+                        "id": curr.modtype,
                         "text": curr.modtype,
-                        "parent": this.parent.id,
+                        "parent": this.parent,
                         "attr": { "type": 'mod' },
                         "children": []
                     }

@@ -22,7 +22,9 @@
                             "inputType" : 'password'
                         }
                     ]
-                }
+                },
+                loginFailed : false,
+                serverFailed : false
             }
         },
         methods: {
@@ -35,9 +37,17 @@
  
                         })
                         .then((response)=>{
+                            this.loginFailed = false;
+                            this.serverFailed = false;
                             this.$router.push("/home");
                         })
+                        .catch(this.handleFailed);
 
+            },
+            handleFailed(err){
+                console.log("Err =>",err);
+                err == 'Unauthorized' ? this.loginFailed = true : this.serverFailed = true;
+                
             }
         },
         mixins: [mixAuth],
@@ -50,6 +60,26 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <vue-form-generator :schema="loginSchema"  :model="loginModel"/>
+                <div v-if="loginFailed">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12 alert alert-danger">
+                                Login Failed
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="serverFailed">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12 alert alert-warning">
+                                Server is Down
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="panel-footer">
                 <button class="btn btn-primary" @click="login">Login</button>

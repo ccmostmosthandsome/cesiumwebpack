@@ -63,7 +63,7 @@ import casKoanTree from '../questions/casKoanTree.vue';
 import mixAuth from '../../auth/mixAuth';
 import mixPersistence from '../../mixins/mixPersistence'
 import clientToggle from '../buttons/clientToggle.vue'
-import menuSchema from '../tree/courseQuestionDropdown'
+import menuSchema from '../../schemas/treeDropdown'
 import casTree from '../tree/casTree.vue'
 import modelData from '../tree/casTreeMock'
 import lodash from 'lodash';
@@ -146,6 +146,7 @@ export default {
     subscriptions() {
         var gradeObservable = this.$watchAsObservable('grade')
             .map((e) => {
+                console.log("dingo subscription...",e);
                 return {
                     coursetype: e.newValue.coursetype,
                     percent: e.newValue.correct ? 100 : 0,
@@ -157,6 +158,7 @@ export default {
             .scan((acc, curr) => {
                 if (acc[curr.coursetype] !== undefined) {
 
+                    console.log("dingo subscription reduce...",acc);
                     if (!acc[curr.coursetype][curr.id]) {
                         this.$set(acc[curr.coursetype], 'count', acc[curr.coursetype].count + 1);
                         this.$set(acc[curr.coursetype], 'percent', curr.percent + acc[curr.coursetype].percent);
@@ -166,6 +168,7 @@ export default {
                         console.log("Observable reduce", acc);
                     }
                 } else {
+                    console.log("dingo subscription reduce...",acc,curr);
                     this.$set(acc, curr.coursetype, { percent: curr.percent, count: 1 })
                     this.$set(acc[curr.coursetype], curr.id, { count: 1 });
                     this.$set(acc[curr.coursetype], 'grade', grade(1, curr.percent));
@@ -199,9 +202,6 @@ export default {
         }
     },
     methods: {
-        handleScroll(e){
-            console.log("Caught scroll in root",e);
-        },
         auth() {
             console.log("in auth");
             if (this.$store.getters.isLoggedIn) {
@@ -258,10 +258,7 @@ export default {
                 .filter(module => module.id);
         },
         createTree() {
-            console.log("dingo");
-            console.log("dingo")
 
-            console.log("dingo")
             let context = this;
             context.parent = 'Root';
 
@@ -269,10 +266,7 @@ export default {
             this.$set(this.tree, 'attr', { type: 'course' })
             this.$set(this.tree, 'parent', 'false')
             this.$set(this.tree, 'children', this.getCourses());
-            console.log("dingo");
-            console.log("dingo")
 
-            console.log("dingo")
 
 
 
@@ -288,7 +282,7 @@ export default {
             console.log("dingo")
                         console.log("dingo")
 
-            console.log("dingo");
+            console.log("dingo grade",value);
 
             if (value.correct || value.exceededTries) {
                 console.log("got value here =>", value);
@@ -298,10 +292,11 @@ export default {
         }.bind(this));
 
         EventBus.$on('dropdownPayload', (payload) => {
-
+            console.log("dingo payload!!!!!!!!!!!!!!!!!!!!!!!!!!!!", payload);
+             console.log("dingo payload!!!!!!!!!!!!!!!!!!!!!!!!!!!!", payload);
             this.fetchResults(payload)
                 .then(function () {
-                    console.log("dingo", payload);
+                    
                     this.questionsByCourse = payload.item;
                     this.coursetype = payload.item;
                 }.bind(this))
@@ -335,7 +330,7 @@ export default {
 }
 </script>
 <template>
-    <div @scroll="handleScroll">
+    <div>
         <client-navbar>
     
             <span slot="right" style="display: inline-block;">
@@ -360,9 +355,8 @@ export default {
             </span>
     
         </client-navbar>
-        <cas-traditionallayout :asideViews="['questionView']" @scroll="handleScroll">
+        <cas-traditionallayout :asideViews="['questionView']">
             <div slot="sidebar">
-    
                 <ul class="nav navbar-nav" id="sidenav01">
                     <li>
                         <router-link to="/home">

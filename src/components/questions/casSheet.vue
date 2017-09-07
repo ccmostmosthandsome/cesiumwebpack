@@ -3,7 +3,7 @@
     <client-dashboard>
       <div class="dashboard-display">
         <cas-palmadoro></cas-palmadoro>
-       
+       <p>Test dingo: {{gradeStream}}</p>
         <div v-for="(program, key) in dashboardGrades" v-bind:key="key" style="display: inline-block;">
           <strong>{{key}} {{program.grade}}</strong>
         </div>
@@ -21,10 +21,14 @@
         <client-checkbox @checked="showHint(question)" :item="question">
           Show Hint
         </client-checkbox>
+        <client-checkbox @checked="openModal = true" :item="question">
+          Show Video
+        </client-checkbox>
         <p v-html="question.question"></p>
       </span>
       <span slot="form">
         <vue-form-generator @model-updated="getChanges" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
+        <cas-video-modal :open="openModal"></cas-video-modal>
       </span>
   
       <br/>
@@ -49,13 +53,14 @@ import clientQuestion from "./clientQuestion.vue";
 import clientCheckbox from "../buttons/clientCheckbox.vue";
 import clientDashboard from "../dashboard/clientDashboard.vue";
 import casPalmadoro from '../timers/casPalmadoro.vue'
+import casVideoModal from './casVideoModal.vue';
 import mixAuth from '../../auth/mixAuth';
 import { EventBus } from '../../eventbus/index';
 import vueToggle from '../buttons/vueToggle.vue';
 import sticky from '../../directives/sticky';
 console.log("Eventbus??? ", EventBus);
 export default {
-  components: { clientQuestion, clientCheckbox, vueToggle, clientDashboard, casPalmadoro },
+  components: {casVideoModal, clientQuestion, clientCheckbox, vueToggle, clientDashboard, casPalmadoro },
   created() {
     this.$eventToObservable('model-updated')
       .subscribe((event) => console.log(event.name, event.msg))
@@ -135,6 +140,7 @@ export default {
       dashboard: {},
       questionsMath: [],
       field: null,
+      openModal: false,
       model: {},
       schema: {},
       formOptions: {

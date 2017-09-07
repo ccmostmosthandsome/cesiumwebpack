@@ -62,7 +62,7 @@ export default {
 </script>
 <template>
     <div class="casHome">
-        <p>dingo koan tree: <cas-koan-tree/></p>
+        
         <cas-display></cas-display>
         <cas-contract @questionAnswered="answer" :hasAnsweredQuestions="hasAnsweredQuestions"></cas-contract>
         <cas-mission :hasAnsweredQuestions="hasAnsweredQuestions"></cas-mission>

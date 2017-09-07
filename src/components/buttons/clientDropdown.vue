@@ -12,10 +12,12 @@ export default {
     methods: {
         notify(selected, event) {
             console.log("running notify!!!!");
-            console.log("store keys",this.$store);
+            console.log("dingo focus item!!",this.focusItem);
             if (event) event.preventDefault();
             console.log("clicking on dropdown",selected,this.options);
-            var selectObject = _.assign(selected,{id: this.options.id, item: this.focusItem.text});
+
+            var selectObject = _.assign(selected,{id: this.options.id, item: this.focusItem.text, koan: this.focusItem.parent.koan, parent: this.focusItem.parent});
+            
             EventBus.$emit('dropdownPayload', selectObject);
 
 
