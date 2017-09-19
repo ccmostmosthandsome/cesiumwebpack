@@ -16,9 +16,9 @@
         <div 
             
             v-for="hint in hints" v-bind:key="hint.questionId">
-
+            
             <span v-html="hint.questionhint"></span>
-
+            
             <hr class="styleGrade"/>
         </div>
     

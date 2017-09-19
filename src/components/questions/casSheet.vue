@@ -92,6 +92,8 @@ export default {
           label: question.quesion,
           answerId: question.answerId,
           coursetype: question.coursetype,
+          koan: question.koan,
+          focusarea: question.modtype,
           type: "questions",
           values: question.values
         }
@@ -119,12 +121,13 @@ export default {
       }
     },
     getChanges(value, model) {
-      console.log("dingo")
+      console.log("dingo got changes...")
             console.log("dingo")
 
-      console.log("dingo")
+      console.log("dingo grade emmitting")
 
-      EventBus.$emit('grade', value, model);
+      //EventBus.$emit('grade', value, model);
+      this.$store.dispatch('grade',value);
 
     }
   },

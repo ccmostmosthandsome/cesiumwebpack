@@ -205,8 +205,8 @@ export default {
                 id: 1,
                 question: null,
                 coursetype: null,
-                modtype: null,
-                koan: null,
+               // modtype: null,
+                koan: 'GED',
                 answerId: null,
                 explanation: null,
                 questionValue_1: null,
@@ -227,18 +227,19 @@ export default {
                         type: "select",
                         label: "coursetype",
                         model: "coursetype",
-                        values: ["Math", "Science", "Language", "Civics"]
-                    },
+                        values: this.getCourses.call(this,this.questionFormModel),
+                        disabled: true
+                    },/*
                     {
                         type: "select",
                         label: "modtype",
                         model: "modtype",
-                        values: ["Intro", "Algebra", "Statistics", "Geometry", "Immigration", "US.Gov"]
-                    },{
+                        values: this.getFocusAreas({"course": this.questionFormModel.coursetype, "koan": this.questionFormModel.koan})
+                    }*/,{
                         type: "select",
                         label: "Koan",
                         model: "koan",
-                        values: ["GED","ASVAB","CW"]
+                        values: this.koans
                     },
                     {
                         type: "input",

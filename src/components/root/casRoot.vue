@@ -5,7 +5,7 @@
 
 .prompt {
     font-size: 14px;
-    font-weight: bold;
+    font-weight: bold;f
     height: 15px;
     padding: 20px 30px 20px 30px;
     letter-spacing: 1px;
@@ -77,12 +77,6 @@ export default {
         isLoggedIn() {
             return this.$store.getters.isLoggedIn;
         },
-        questions: {
-            cache: false,
-            get() {
-                return this.$store.getters.questions('GED');
-            }
-        },
         questionsByCourse: {
             get() {
                 return this.$store.getters.questions(this.questionsCategory);
@@ -113,6 +107,11 @@ export default {
                  console.log("dingo",this.program);
             }
         },
+        dashboardTree: {
+            get(){
+                return this.$store.getters.tree;
+            }
+        }
 
     },
     created() {
@@ -276,28 +275,30 @@ export default {
     mixins: [mixAuth, mixDropDown, mixPersistence],
     mounted() {
    
-    
 
         EventBus.$on('grade', function (value, model) {
-            console.log("dingo")
-                        console.log("dingo")
-
+            
             console.log("dingo grade",value);
 
             if (value.correct || value.exceededTries) {
-                console.log("got value here =>", value);
-                this.grade = value;
+                console.log("dingo setting grade observable =>",value, this.$gradeObservable);
+                
+                this.$set(this,'grade',value);
+                console.log("dingo setting grade observable =>",this.$gradeObservable);
+                
             }
 
         }.bind(this));
 
         EventBus.$on('dropdownPayload', (payload) => {
             console.log("dingo payload!!!!!!!!!!!!!!!!!!!!!!!!!!!!", payload);
-             console.log("dingo payload!!!!!!!!!!!!!!!!!!!!!!!!!!!!", payload);
             this.fetchResults(payload)
                 .then(function () {
-                    
+                     console.log("dingo running payload!!!!!!!!!!!!!!!!!!!!!!!!!!!!", payload);
+
                     this.questionsByCourse = payload.item;
+                    this.$store.dispatch('initDashboardQuestions',this.questionsByCourse);
+                    this.$store.dispatch('initDashboard');
                     this.coursetype = payload.item;
                 }.bind(this))
 
@@ -390,7 +391,9 @@ export default {
     
             </div>
             <div slot="content" >
-                
+                <p>#########</p>
+                <p> tree: {{dashboardTree}}</p>
+                <p>#########</p>
                 <router-view :questions="questionsByCourse" :programStatus="programStatus" :gradeStream="$gradeObservable" ></router-view>
             </div>
             <div slot="aside" style="margin-left: 0;">

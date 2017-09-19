@@ -12,6 +12,7 @@ import clientGrid from "../grids/clientGrid.vue";
 import clientModal from "../modal/clientModal.vue"
 import s2aAdminModal from "./s2aAdminModal.vue"
 import casNewKoan from "./casNewKoan.vue";
+import casAddQuestion from "./casAddQuestion.vue";
 import clientRadio from "../buttons/clientRadio.vue";
 import clientSpinner from "../spinner/clientSpinner.vue";
 import clientFileselect from "../buttons/clientFileselect.vue";
@@ -40,7 +41,7 @@ export default {
             },
             set(koan) {
                 console.log("dingo computed setter for vues", this);
-                this.$store.dispatch('setQuestionSchema', koan);
+                this.$store.dispatch('setKoanSchema', koan);
             }
         },
         spinnerLoading() {
@@ -51,13 +52,17 @@ export default {
             'koanNameModel',
             'koanNameSchema',
             'koanListModel',
-            'koanListSchema'
-        ])
+            'koanListSchema',
+            'koanNames',
+            'allKoans',
+            'koanNames',
+        ]),
+
     },
     data: function() {
         return {
             koans: {
-                initial : 'initial'
+                initial: 'initial'
             },
             color: 'green',
             loading: false,
@@ -67,10 +72,6 @@ export default {
             submit: 'question',
             bulkExcelDocuments: {},
             questionScreen: false,
-            radioNewQuestion: [
-                { text: 'Upload Questions', value: 'upload' },
-                { text: 'Enter New Question', value: 'input' },
-            ],
             latex: null,
             modalstatus: false,
             tabIndex: null,
@@ -81,6 +82,7 @@ export default {
 
     },
     components: {
+        casAddQuestion,
         casNewKoan,
         clientModal,
         clientGrid,
@@ -92,49 +94,52 @@ export default {
         PulseLoader
     },
     methods: {
+        getCourses(koan){
+            console.log("getting koan dingo ... =>",koan,this['questionFormModel'],Object.keys(this));
+            if(!koan){
+                return []
+            } else {
+                return this.$store.getters.courseNames(koan);
+            }
+            
+        },
+        getFocusAreas(focusObject){
+            return this.$store.getters.focusAreaNames(focusObject)
+        },
         submitKoan() {
 
             console.log("dingo");
 
             console.log("dingo");
-            
-            for(let koanItem in this.koanCourseFactory){
-                let courses = this.koanCourseFactory[koanItem].schema.fields
-                                        .filter(field => field.label == "Course");
-                let focusAreas = this.koanCourseFactory[koanItem].schema.fields
-                                        .filter(field => field.label == "Focus Area");
+
+            let returnObject = Object.keys(this.koanCourseFactory).map((key) => {
+                let koan = {};
+                let courses = this.koanCourseFactory[key].schema.fields
+                    .filter(field => field.label == "Course")
+                    .map(course => {
+                        return {
+                            "course": this.koanCourseFactory[key].model[course.model],
+                            "grade" : 0
+                        }
+                    })
+                let focusAreas = this.koanCourseFactory[key].schema.fields
+                    .filter(field => field.label == "Focus Area")
+                    .map(focusArea => {
+                        console.log("dingo focusAreas =>",this.koanCourseFactory[key].model[focusArea.model],focusArea, this.koanCourseFactory[key]);
+
+                        return {
+                            "focusArea": this.koanCourseFactory[key].model[focusArea.model],
+                            "grade" : 0
+                        }
+                    })
+                koan.courses = courses;
+                koan.focusAreas = focusAreas;
+                koan.koan = this.koanNameModel.name;
+                return koan
                 
-                console.log("dingo dingo dingo");
-                console.log("dingo dingo dingo");
+            });
 
-                console.log("dingo dingo dingo");
-
-            }
-            
-            let submitModel = {
-                name: this.koanNameModel.name,
-                courseGrades: Object.keys(koanListModel)
-                    .reduce((acc, curr) => {
-                        if (curr.indexOf('_') !== -1) {
-                            console.log(curr, curr.split('_')[1])
-                            acc[koanListModel[curr]] = 0;
-                        }
-                        return acc;
-                    }, {}),
-                focusAreaGrades: Object.keys(koanListModel)
-                    .reduce((acc, curr) => {
-                        if (curr.indexOf('_') !== -1) {
-                            console.log(curr, curr.split('_')[1])
-                            acc[koanListModel[curr]] = 0;
-                        }
-                        return acc;
-                    }, {}),
-                testerId: this.account.sub,
-                koan: this.koanNameModel.name
-
-            }
-            console.log("Submit Model =>",submitModel);
-            this.persistencePost('services/program/add', submitModel)
+            this.persistencePost('services/program/add', returnObject)
                 .then(response => {
                     if (response.ok) {
                         return response.json
@@ -144,10 +149,82 @@ export default {
                 .then(response => {
                     console.log("Added Program", response);
                 })
+            /*
+                        for (let koanItem in this.koanCourseFactory) {
+                            let course = this.koanCourseFactory[koanItem].schema.fields
+                                .filter(field => field.label == "Course")
+                                .reduce((acc,curr)=>{
+            
+                                },{})
+                            let focusAreas = this.koanCourseFactory[koanItem].schema.fields
+                                .filter(field => field.label == "Focus Area");
+                            let submitModel = {
+                                name: this.koanNameModel.name,
+                                courseGrades: Object.keys(koanListModel)
+                                    .reduce((acc, curr) => {
+                                        if (curr.indexOf('_') !== -1) {
+                                            console.log(curr, curr.split('_')[1])
+                                            acc[koanListModel[curr]] = 0;
+                                        }
+                                        return acc;
+                                    }, {}),
+                                focusAreaGrades: Object.keys(koanListModel)
+                                    .reduce((acc, curr) => {
+                                        if (curr.indexOf('_') !== -1) {
+                                            console.log(curr, curr.split('_')[1])
+                                            acc[koanListModel[curr]] = 0;
+                                        }
+                                        return acc;
+                                    }, {}),
+                                testerId: this.account.sub,
+                                koan: this.koanNameModel.name
+            
+                            }
+                            console.log("dingo dingo dingo");
+                            console.log("dingo dingo dingo");
+            
+                            console.log("dingo dingo dingo");
+            
+                        }
+            
+                        let submitModel = {
+                            name: this.koanNameModel.name,
+                            courseGrades: Object.keys(koanListModel)
+                                .reduce((acc, curr) => {
+                                    if (curr.indexOf('_') !== -1) {
+                                        console.log(curr, curr.split('_')[1])
+                                        acc[koanListModel[curr]] = 0;
+                                    }
+                                    return acc;
+                                }, {}),
+                            focusAreaGrades: Object.keys(koanListModel)
+                                .reduce((acc, curr) => {
+                                    if (curr.indexOf('_') !== -1) {
+                                        console.log(curr, curr.split('_')[1])
+                                        acc[koanListModel[curr]] = 0;
+                                    }
+                                    return acc;
+                                }, {}),
+                            testerId: this.account.sub,
+                            koan: this.koanNameModel.name
+            
+                        }
+                        console.log("Submit Model =>", submitModel);
+                        this.persistencePost('services/program/add', submitModel)
+                            .then(response => {
+                                if (response.ok) {
+                                    return response.json
+                                }
+                                console.log("API Call failed")
+                            })
+                            .then(response => {
+                                console.log("Added Program", response);
+                            })
+                    */
         },
-        addCourse(){
+        addCourse() {
             let name = "koan" + Math.floor(Math.random() * 3377);
-            this.$set(this.koans,name,name);
+            this.$set(this.koans, name, name);
         },
         getEditorValue(data) {
             console.log(" this is the data =>", data);
@@ -215,12 +292,6 @@ export default {
                     console.log("dingo", this.bulkExcelDocuments.sheets.Questions[0]);
                     console.log("dingo", normalizedQuestions);
 
-                    console.log("dingo")
-
-                    console.log("dingo")
-
-                    console.log("dingo")
-                    console.log("all promises complete!!", response);
                     return Promise.all(normalizedContent.map((content) => {
                         console.log("###########Content#########", content);
                         return this.persistencePost('/services/questions/add/content', content);
@@ -471,70 +542,13 @@ export default {
 </style>
 <template>
     <div>
-
         <b-tabs ref="tabs" v-model="tabIndex">
             <b-tab title="Add Questions" active>
-                <div class="panel panel-default">
-                    <div class="panel panel-header">
-                        <h3>Add Question or Upload Questions</h3>
-                        <vue-form-generator :schema="throwAwaySchema" :model="throwAwayModel"></vue-form-generator>
-                        {{throwAwayModel}}
-                        <client-radio :options="radioNewQuestion" @radioSelected="displayQuestionScreen"></client-radio>
-                    </div>
-                    <div class="panel panel-body">
-                        <div v-if="questionScreen === 'input' && spinnerLoading === false">
-                            <vue-form-generator :schema="questionFormSchema" :model="questionFormModel"></vue-form-generator>
-                        </div>
-
-                        <div v-if="questionScreen === 'upload' && spinnerLoading === false">
-                            <client-accordion>
-                                <panel is-open type="primary">
-                                    <strong slot="header">
-                                        <u>Panel #1</u>
-                                    </strong>
-
-                                </panel>
-                            </client-accordion>
-                            <div class="btn-group" role="group" aria-label="Bulk Upload Group Bar">
-
-                                <div style="display: inline-block;">
-                                    <client-fileselect @input="handleFileUpload" type="excel" />
-                                </div>
-
-                            </div>
-
-                        </div>
-                        <div v-if="spinnerLoading">
-                            <client-spinner></client-spinner>
-                        </div>
-
-                    </div>
-                    <div class="panel panel-footer">
-                        <span v-if="questionScreen==='input'">
-                            <pulse-loader :loading="loading" :color="color"></pulse-loader>
-                            <button class="btn btn-default" @click="addSelectionValue('questionForm')">Add Value</button>
-
-                            <button class="btn btn-primary" @click="createQuestion">Submit Question</button>
-
-                        </span>
-                        <span v-else-if="questionScreen === 'upload'">
-                            <button class="btn btn-primary" @click="bulkAddQuestion">Upload Excel Questions</button>
-
-                        </span>
-                        <span v-else>
-                            <label>
-                                <h4>Select a Value</h4>
-                            </label>
-                        </span>
-
-                    </div>
-
-                </div>
-
+                <cas-add-question></cas-add-question>
             </b-tab>
             <b-tab title="Add Question Content">
                 <div class="content">
-
+                    dingo: {{allKoans}}
                     <vue-form-generator :schema="questionMaterialSchema" :model="questionMaterialModel"></vue-form-generator>
                     </br>
                     <button class="btn btn-default" @click="showMathJax()">Update Mathjax</button>
@@ -567,8 +581,6 @@ export default {
                         <vue-form-generator :schema="koanNameSchema" :model="koanNameModel" />
                         <!-- <vue-form-generator :schema="koanListSchema" :model="koanListModel" /> -->
                         <cas-new-koan v-for="(name,index) in koans" :track-by="index"></cas-new-koan>
-                        
-
 
                     </div>
                     <div class="panel panel-footer">

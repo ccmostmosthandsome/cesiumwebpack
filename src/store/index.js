@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import jwtDecode from 'jwt-decode';
 import { getAuthHeader } from '../auth/modAuth';
 import admin from './modules/admin';
+import dashboard from './modules/dashboard';
 Vue.use(Vuex)
 
 const state = {
@@ -617,6 +618,7 @@ export default new Vuex.Store({
     actions,
     mutations,
     modules: {
-        admin
+        admin,
+        dashboard
     }
 })
