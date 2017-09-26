@@ -5,11 +5,15 @@
                 <div class="col-md-12" style="padding-left: 0;">
                     <div :class="[panelStyle]" style="background: #ffffff ; color: #787878 ;">
                         <nav class="navbar navbar-light justify-content-between">
-                            <slot></slot>
+                            <slot name="body"></slot>
                             </hr>
+                            
                             <form class="form-inline">
+                                <slot name="footer"></slot>
+                                <!--
                                 <input class="form-control mr-sm-2" type="text" placeholder="Search">
                                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                -->
                             </form>
                         </nav>
     
@@ -69,13 +73,7 @@ export default {
 }
 
 
-.dashPanel {
-    display: block;
-    z-index: 100;
-    width: 75%;
-    /* padding: 5px;
-    color: whitesmoke; */
-}
+
 
 
 </style>

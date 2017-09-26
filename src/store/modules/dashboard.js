@@ -3,9 +3,9 @@ import traverseBf from '../../utilities/traverseBf';
 import Queue from "../../utilities/queue";
 const state = {
     statusTree: {},
-    dashboard: {
-        koans: {},
-        courses: {},
+    statusDashboard: {
+        koan: {},
+        coursetype: {},
         focusareas: {}
     },
     questions: []
@@ -45,7 +45,8 @@ const mutations = {
         };
         const percent = gradeSubmission.correct ? 100 : 0;
         for(var i in gradeObject){
-            let gradeNode = {};
+            let gradeNode,parentNode;
+            
             state.statusTree.contains(state.statusTree.traverseBf,(node)=>{
                  if(node.data == gradeObject[i]){
                      console.log("dingo")
@@ -53,11 +54,18 @@ const mutations = {
                      
                      console.log("dingo")
                      
-                    gradeNode = _.assign(node,{});
+                    gradeNode = node;
+                     
+                    console.log("dingo")
+                    console.log("dingo")
+
+                    console.log("dingo")
+                    
                  }  
             });
 
-            gradeNode.metadata.count =  gradeNode.metadata.count ? gradeNode.metadata.count++ : 1;
+
+            gradeNode.metadata.count =  gradeNode.metadata.count > 0 ? gradeNode.metadata.count + 1 : 1;
             gradeNode.metadata.sum = gradeNode.metadata.sum ? gradeNode.metadata.sum + percent : percent;
            
 
@@ -65,10 +73,11 @@ const mutations = {
             Vue.set(gradeNode.metadata,'count',gradeNode.metadata.count);
             Vue.set(gradeNode.metadata,'sum',gradeNode.metadata.sum);            
             Vue.set(gradeNode.metadata,'percent',gradeNode.metadata.percent);
-            Vue.set(state.dashboard[i], gradeObject[i],gradeNode.metadata.percent);
+            Vue.set(state.statusDashboard[i], gradeObject[i],gradeNode.metadata.percent);
+            console.log("set grade...",state.statusDashboard);
         }
 
-        console.log("digo grade gradeNode + ",gradeObject);        
+             
 
     }
 
@@ -81,7 +90,7 @@ const actions = {
 };
 
 const getters = {
-    tree: (state, getters) => state.statusTree
+    statusDashboard: (state, getters) => state.statusDashboard
 };
 
 export default {

@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import jwtDecode from 'jwt-decode';
 import { getAuthHeader } from '../../auth/modAuth';
 
-const account = jwtDecode(localStorage.getItem('token'));
+//const account = jwtDecode(localStorage.getItem('token'));
 
 const state = {
     koans: {},

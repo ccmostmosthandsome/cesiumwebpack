@@ -29,8 +29,8 @@
     </nav>
 </template>
 <script>
-    import mixAuth from '../../auth/mixAuth';
-    import jwtDecode from 'jwt-decode';
+
+
     export default {
         name: 'clientNavbar',
         methods: {
@@ -39,15 +39,8 @@
                  this.userAccount = {}; 
                  this.$store.dispatch('logout');
             },
-            testAccount(){
-               let account =  jwtDecode(localStorage.getItem('token'));
-               console.log("dingo account =",account);
-            }
-        },
-        computed: {
 
-        },
-        mixins: [mixAuth]
+        }
         
     }
 </script>

@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import jwtDecode from 'jwt-decode';
-import { getAuthHeader } from '../auth/modAuth';
+import { getAuthHeader, getAccount } from '../auth/modAuth';
+
 import admin from './modules/admin';
 import dashboard from './modules/dashboard';
 Vue.use(Vuex)
@@ -32,12 +33,15 @@ let mutations = {
     SET_PROGRAM(state, payload){
             console.log("dingo program vuex",state,payload,payload.name);
             if(payload.length){
-                let account = jwtDecode(localStorage.getItem('token'));
+
+                let account = getAccount();
                 Vue.set(state.program, 'userId',account.sub);
                 Vue.set(state.program,'id', payload.id);
                 Vue.set(state.program, payload[0].name, true);
                 
                 Vue.set(state.program,'koans', payload[0].koans);
+
+
             }
 
         
@@ -164,8 +168,9 @@ const actions = {
 
        
 
-
-        let account = jwtDecode(localStorage.getItem('token'));
+       
+        let account = getAccount();
+        
         let request = new Request('services/program/subscribe/?hasProgram=' + state.hasProgram + '&userId=' + account.sub, {
             method: 'POST',
             mode: 'cors',
@@ -235,7 +240,10 @@ const actions = {
     removeHint: ({ commit }, state) => commit('REMOVE_HINT', state),
     fetchUserProgram:  ({ commit }, state) => {
         console.log("fetchUserProgram dingo program")
-        let account = jwtDecode(localStorage.getItem('token'));
+    
+        let account = getAccount()
+        
+        
         return new Promise((resolve, reject) => {
             let request = new Request('services/program/' + account.sub, {
                 method: 'GET',
@@ -269,7 +277,7 @@ const actions = {
         });
     },
     fetchMissionStatement: ({ commit }, state) => {
-        let account = jwtDecode(localStorage.getItem('token'));
+        let account = getAccount();
         return new Promise(resolve => {
             let request = new Request('/services/mission/find/' + account.sub, {
                 method: 'GET',
@@ -377,8 +385,8 @@ const actions = {
         console.log("dingo")
         console.log("dingo")
 
-
-        let account = jwtDecode(localStorage.getItem('token'));
+        
+        let account = getAccount();
         return new Promise(resolve => {
             let request = new Request('services/contract/answer/list/user?userid=' + account.sub, {
                 method: 'GET',

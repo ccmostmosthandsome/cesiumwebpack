@@ -68,14 +68,13 @@ import casTree from '../tree/casTree.vue'
 import modelData from '../tree/casTreeMock'
 import lodash from 'lodash';
 import RX from 'rxjs';
-console.log("compoennts =>", casTraditionallayout, clientNavbar, clientToggle, casTree);
-console.log("mixins =>", mixAuth);
+
 export default {
     name: 'casRoot',
     components: { casTraditionallayout, clientNavbar, clientToggle, casTree, casKoanTree },
     computed: {
         isLoggedIn() {
-            return this.$store.getters.isLoggedIn;
+           // return this.$store.getters.isLoggedIn;
         },
         questionsByCourse: {
             get() {
@@ -352,6 +351,7 @@ export default {
                     </router-link>
     
                 </div>
+                
     
             </span>
     
@@ -391,9 +391,7 @@ export default {
     
             </div>
             <div slot="content" >
-                <p>#########</p>
-                <p> tree: {{dashboardTree}}</p>
-                <p>#########</p>
+
                 <router-view :questions="questionsByCourse" :programStatus="programStatus" :gradeStream="$gradeObservable" ></router-view>
             </div>
             <div slot="aside" style="margin-left: 0;">

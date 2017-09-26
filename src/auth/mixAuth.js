@@ -17,8 +17,13 @@ export default  {
             cache: false,
             get(){
                 if(this.$store.getters.isLoggedIn){
-                    console.log("getting jwt token account:?????", jwtDecode(localStorage.getItem('token')))
-                    return jwtDecode(localStorage.getItem('token'));
+                    if(localStorage.getItem('token')){
+                        console.log("decoding in mix auth...");
+                        return jwtDecode(localStorage.getItem('token'));
+                    } else {
+                        return undefined
+                    }
+                    
                 } else {
                     return {
                         sub: 'guest'

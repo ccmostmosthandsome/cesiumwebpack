@@ -1,22 +1,33 @@
 <template>
   <div style="margin-left: 0">
     <client-dashboard>
-      <div class="dashboard-display">
-        <cas-palmadoro></cas-palmadoro>
-       <p>Test dingo: {{gradeStream}}</p>
-        <div v-for="(program, key) in dashboardGrades" v-bind:key="key" style="display: inline-block;">
-          <strong>{{key}} {{program.grade}}</strong>
-        </div>
-         
+      <div class="dashboard-display" slot="body">
         
-      
+        <div class="flex-grid" >
+          <div class="col">
+            <cas-palmadoro></cas-palmadoro>
+          </div>
+          <div v-for="(val, key) in statusDashboard" :key="key" class="col">             
+             <div class="flex-grid ">
+                <div v-for="(item, innerKey) in val" :key="innerKey" class="col">
+                  <div class="dashboardHeader">{{innerKey}}</div>
+                  <div class="dashboardValue">{{item}}</div>
+                </div> 
+             </div>
+          </div>
+        </div>
+
+ 
+
       </div>
-  
+      <div slot="footer">
+
+      </div>
     </client-dashboard>
-  
-    <div style="padding-left: 1em;" v-for="(question, index) in questionsMath" :key="question.id" :number="index + 1" >
-  
-      <span slot="symbols" >
+
+    <div style="padding-left: 1em;" v-for="(question, index) in questionsMath" :key="question.id" :number="index + 1">
+
+      <span slot="symbols">
         <!-- <vue-toggle :value="true" :labels="{checked: 'Foo', unchecked: 'Bar'}" /> -->
         <client-checkbox @checked="showHint(question)" :item="question">
           Show Hint
@@ -30,20 +41,58 @@
         <vue-form-generator @model-updated="getChanges" :schema="schema[question.id]" :model="model[question.id]"></vue-form-generator>
         <cas-video-modal :open="openModal"></cas-video-modal>
       </span>
-  
+
       <br/>
     </div>
-  
+
   </div>
 </template>
 <style>
+
+.dashboardHeader{
+  display: inline-block;
+  font-weight: bold;
+}
+
+.dashboardBody{
+
+}
+.flex-grid{
+  display : flex;
+}
+
+.col {
+  flex : 1;
+}
+
 .dashboard-display {
   display: inline-block;
-
 }
 
 .dashboard-content {
   margin: .5em auto;
+}
+
+
+@media screen and (min-width: 0px) and (max-width: 400px) {
+  .dashPanel {
+    display: block;
+    z-index: 100;
+    width: 75%;
+    display: none;
+    /* padding: 5px;
+        color: whitesmoke; */
+  }
+}
+
+@media screen and (min-width: 401px) and (max-width: 1024px) {
+  .dashPanel {
+    display: block;
+    z-index: 100;
+    width: 75%;
+    /* padding: 5px;
+        color: whitesmoke; */
+  }
 }
 </style>
 <script>
@@ -56,34 +105,28 @@ import casPalmadoro from '../timers/casPalmadoro.vue'
 import casVideoModal from './casVideoModal.vue';
 import mixAuth from '../../auth/mixAuth';
 import { EventBus } from '../../eventbus/index';
+import { mapGetters } from 'vuex';
 import vueToggle from '../buttons/vueToggle.vue';
 import sticky from '../../directives/sticky';
 console.log("Eventbus??? ", EventBus);
 export default {
-  components: {casVideoModal, clientQuestion, clientCheckbox, vueToggle, clientDashboard, casPalmadoro },
+  components: { casVideoModal, clientQuestion, clientCheckbox, vueToggle, clientDashboard, casPalmadoro },
   created() {
     this.$eventToObservable('model-updated')
       .subscribe((event) => console.log(event.name, event.msg))
   },
   computed: {
-    dashboardGrades() {
-      
-      for(var i in this.gradeStream ){
-        this.$set(this.dashboard,i,this.gradeStream[i]);
-      }
-      
-      return this.dashboard;
-    }
+    ...mapGetters(['statusDashboard'])
   },
   directives: {
     sticky
   },
   watch: {
 
-    questions: function (newQuestions) {
+    questions: function(newQuestions) {
       this.questionsMath = [];
       console.log("dingo casSHeet ==========>", this.questions);
-      this.questions.forEach(function (question) {
+      this.questions.forEach(function(question) {
         this.questionsMath.push(question);
         this.$set(this.model, question.id, { id: question.id });
         this.$set(this.model[question.id], question.question, null);
@@ -101,7 +144,7 @@ export default {
           fields: []
         }
         this.schema[question.id].fields.push(questionSchema);
-        this.$nextTick(function () {
+        this.$nextTick(function() {
           MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         });
       }.bind(this));
@@ -122,23 +165,27 @@ export default {
     },
     getChanges(value, model) {
       console.log("dingo got changes...")
-            console.log("dingo")
+      console.log("dingo")
 
-      console.log("dingo grade emmitting")
+
 
       //EventBus.$emit('grade', value, model);
-      this.$store.dispatch('grade',value);
+
+      if (value.correct || value.exceededTries) {
+        this.$store.dispatch('grade', value);
+        console.log("dispatched grade action...");
+      }
 
     }
   },
   mounted() {
 
-    this.$nextTick(function () {
+    this.$nextTick(function() {
       MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     });
 
   },
-  data: function () {
+  data: function() {
     return {
       dashboard: {},
       questionsMath: [],
